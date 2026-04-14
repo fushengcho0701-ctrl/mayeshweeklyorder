@@ -6,97 +6,120 @@
     <title>[FWU] Mayesh Weekly Order</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --fwu-blue: #0056b3; }
-        body { background-color: #f4f7f6; color: #333; }
-        .header-section { background: white; padding: 30px 0; border-bottom: 3px solid var(--fwu-blue); margin-bottom: 30px; text-align: center; }
-        .logo { max-width: 280px; margin-bottom: 15px; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        .card-title { color: var(--fwu-blue); font-weight: bold; border-left: 5px solid var(--fwu-blue); padding-left: 10px; }
-        .pack-rate-box { background: #e9ecef; border-radius: 8px; padding: 15px; height: 100%; border: 1px solid #dee2e6; }
-        .unit-badge { background: var(--fwu-blue); color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.85rem; }
-        .btn-submit { background: var(--fwu-blue); border: none; padding: 15px; font-size: 1.2rem; }
+        :root { --fwu-blue: #0056b3; --fwu-light: #f8f9fa; }
+        body { background-color: #f4f7f6; color: #333; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        
+        /* Header */
+        .header-section { background: white; padding: 25px 0; border-bottom: 4px solid var(--fwu-blue); text-align: center; margin-bottom: 30px; }
+        .logo { max-width: 250px; margin-bottom: 10px; }
+        
+        /* Section Titles */
+        .card-title { color: var(--fwu-blue); font-weight: 700; border-left: 5px solid var(--fwu-blue); padding-left: 12px; margin-bottom: 20px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+
+        /* Section 1: Pack Rate Table */
+        .pack-table { font-size: 0.85rem; }
+        .pack-table th { background-color: #f1f3f5; border: 1px solid #dee2e6; text-align: center; white-space: nowrap; }
+        .pack-table td { border: 1px solid #dee2e6; text-align: center; vertical-align: middle; padding: 6px; }
+
+        /* Section 4: Item Box (Grid) */
+        .item-box {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        .item-box:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: var(--fwu-blue); }
+        .item-img { width: 100%; height: 220px; object-fit: cover; border-bottom: 1px solid #f0f0f0; }
+        .item-content { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; }
+        .item-type { color: var(--fwu-blue); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .item-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
+        .item-intro { font-size: 0.85rem; color: #6c757d; line-height: 1.5; margin-bottom: 20px; }
+        
+        /* Order Controls */
+        .order-action { margin-top: auto; padding-top: 15px; border-top: 1px solid #f0f0f0; }
+        .unit-label { background: #e9ecef; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; font-size: 0.9rem; font-weight: 600; }
+        
+        .btn-submit { background: var(--fwu-blue); border: none; padding: 16px; font-weight: bold; border-radius: 10px; transition: 0.3s; }
+        .btn-submit:hover { background: #004494; transform: scale(1.01); }
     </style>
 </head>
 <body>
 
 <div class="header-section">
     <img src="https://images.squarespace-cdn.com/content/689dd63b4e427050b1bc75a0/b97177cc-9349-4e60-b7ce-83c7097ba6aa/logo+%E9%80%8F%E6%98%8E.png" alt="FWU Logo" class="logo">
-    <h1>Mayesh Weekly Order Form</h1>
+    <h2 class="mt-2">[FWU] Mayesh Weekly Order</h2>
 </div>
 
-<div class="container">
+<div class="container pb-5">
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title mb-4">Section 1: Shipping Pack Rate</h5>
-            <div id="packRateContent" class="row g-3">
-                <div class="col-md-4"><div class="pack-rate-box">Loading rates...</div></div>
+            <h5 class="card-title">Section 1: Shipping Pack Rate Reference</h5>
+            <div class="table-responsive">
+                <table class="table pack-table table-sm mb-0">
+                    <thead id="packRateHeader"></thead>
+                    <tbody id="packRateBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <form id="orderForm">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Section 2: Delivery Location</h5>
-                <select name="location" class="form-select form-select-lg" required>
-                    <option value="">-- Please Select Your Market --</option>
-                    <option value="Loc1">Loc1-- LA Market</option>
-                    <option value="Loc3">Loc3-- Orange County</option>
-                    <option value="Loc5">Loc5-- Carlsbad</option>
-                    <option value="Loc6">Loc6-- Riverside</option>
-                    <option value="Loc9">Loc9-- LAX</option>
-                    <option value="Loc10">Loc10-- Phoenix</option>
-                    <option value="Loc12">Loc12-- Oxnard</option>
-                    <option value="Loc19">Loc19-- Portland</option>
-                    <option value="Loc21">Loc21-- Seattle</option>
-                    <option value="Loc25">Loc25-- San Francisco</option>
-                </select>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Section 2: Location</h5>
+                        <select name="location" class="form-select form-select-lg" required>
+                            <option value="">-- Select Market --</option>
+                            <option value="Loc1">Loc1-- LA Market</option>
+                            <option value="Loc3">Loc3-- Orange County</option>
+                            <option value="Loc5">Loc5-- Carlsbad</option>
+                            <option value="Loc6">Loc6-- Riverside</option>
+                            <option value="Loc9">Loc9-- LAX</option>
+                            <option value="Loc10">Loc10-- Phoenix</option>
+                            <option value="Loc12">Loc12-- Oxnard</option>
+                            <option value="Loc19">Loc19-- Portland</option>
+                            <option value="Loc21">Loc21-- Seattle</option>
+                            <option value="Loc25">Loc25-- San Francisco</option>
+                        </select>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Section 3: Shipping Date</h5>
-                <input type="date" name="shippingDate" class="form-control form-control-lg" required>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Section 4: Variety Order List</h5>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Variety Name</th>
-                                <th style="width: 200px;">Quantity</th>
-                                <th>Unit</th>
-                            </tr>
-                        </thead>
-                        <tbody id="varietyTable">
-                            </tbody>
-                    </table>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Section 3: Shipping Date</h5>
+                        <input type="date" name="shippingDate" class="form-control form-control-lg" required>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-submit w-100 mb-5">Confirm & Submit Order</button>
+        <h5 class="card-title mb-4">Section 4: Variety Order List</h5>
+        <div id="varietyGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+            </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary btn-submit w-100 btn-lg shadow">SUBMIT WEEKLY ORDER</button>
     </form>
 </div>
 
 <div class="modal fade" id="summaryModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">Order Submitted Successfully!</h5>
             </div>
-            <div class="modal-body">
-                <h6>Your Order Summary:</h6>
-                <div id="summaryList" class="my-3"></div>
+            <div class="modal-body p-4">
+                <p class="text-muted">Thank you for your order. Here is your summary:</p>
+                <div id="summaryList" class="bg-light p-3 rounded shadow-sm"></div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-success" onclick="downloadCSV()">Download Excel (.csv)</button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.reload()">New Order</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.reload()">Start New Order</button>
             </div>
         </div>
     </div>
@@ -104,10 +127,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // 這裡替換成您 GAS 部署後的 Web App URL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
+    // 重要：請置換為您的 GAS 網址
+    const GAS_URL = '您的_GAS_WEB_APP_URL';
 
-    // 1. 初始化：載入 Pack Rate 與 Variety List
+    let lastOrderItems = [];
+
     window.onload = function() {
         fetch(`${GAS_URL}?action=init`)
         .then(res => res.json())
@@ -117,46 +141,67 @@
         });
     };
 
-    function renderPackRate(rates) {
-        const container = document.getElementById('packRateContent');
-        container.innerHTML = rates.map(r => `
-            <div class="col-md-4">
-                <div class="pack-rate-box">
-                    <small class="text-secondary font-weight-bold">${r[0]}</small><br>
-                    <strong>${r[1]}</strong>
-                </div>
-            </div>
-        `).join('');
+    function renderPackRate(data) {
+        const header = document.getElementById('packRateHeader');
+        const body = document.getElementById('packRateBody');
+        header.innerHTML = `<tr>${data[0].map(h => `<th>${h}</th>`).join('')}</tr>`;
+        body.innerHTML = data.slice(1).map(row => `<tr>${row.map(cell => `<td>${cell || ''}</td>`).join('')}</tr>`).join('');
     }
 
     function renderVarieties(vars) {
-        const tbody = document.getElementById('varietyTable');
-        tbody.innerHTML = vars.map(v => {
-            const unit = v[0].includes('Oncidium') ? 'BU' : 'Box';
+        const grid = document.getElementById('varietyGrid');
+        grid.innerHTML = vars.map(v => {
+            const name = v[0];
+            const intro = v[1] || 'Freshly exported from Taiwan.';
+            const imgUrl = v[2] || 'https://via.placeholder.com/400x300?text=FWU+Flower';
+            const type = v[3] || 'Taiwan Fresh';
+            
+            // 下單單位判斷：只有 Oncidium 為 BU
+            const unit = name.toLowerCase().includes('oncidium') ? 'BU' : 'Box';
+
             return `
-                <tr>
-                    <td class="align-middle">${v[0]}</td>
-                    <td><input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0"></td>
-                    <td class="align-middle"><span class="unit-badge">${unit}</span></td>
-                </tr>
+                <div class="col">
+                    <div class="item-box">
+                        <img src="${imgUrl}" class="item-img" alt="${name}">
+                        <div class="item-content">
+                            <div class="item-type">${type}</div>
+                            <div class="item-name">${name}</div>
+                            <div class="item-intro">${intro}</div>
+                            <div class="order-action">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">Qty</span>
+                                    <input type="number" class="form-control order-qty" data-name="${name}" data-unit="${unit}" min="0" value="0">
+                                    <span class="unit-label">${unit}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             `;
         }).join('');
     }
 
-    // 2. 提交表單
-    let lastOrderData = [];
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Processing...";
+
         const items = [];
         document.querySelectorAll('.order-qty').forEach(input => {
-            if(input.value > 0) {
+            if(parseInt(input.value) > 0) {
                 items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
             }
         });
 
-        if(items.length === 0) return alert("Please enter at least one item.");
+        if(items.length === 0) {
+            alert("Please enter a quantity for at least one item.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "SUBMIT WEEKLY ORDER";
+            return;
+        }
 
-        const postData = {
+        const payload = {
             location: document.querySelector('[name="location"]').value,
             shippingDate: document.querySelector('[name="shippingDate"]').value,
             items: items
@@ -164,35 +209,36 @@
 
         fetch(GAS_URL, {
             method: 'POST',
-            body: JSON.stringify(postData)
+            body: JSON.stringify(payload)
         })
         .then(res => res.json())
-        .then(response => {
-            if(response.result === 'success') {
-                lastOrderData = items;
-                showSummary(postData);
+        .then(res => {
+            if(res.result === 'success') {
+                lastOrderItems = items;
+                showSummary(payload);
             }
         });
     };
 
     function showSummary(data) {
-        let html = `<p><strong>Location:</strong> ${data.location}</p><p><strong>Date:</strong> ${data.shippingDate}</p><hr>`;
-        html += '<table class="table table-sm"><tr><th>Variety</th><th>Qty</th></tr>';
+        let html = `<p><strong>Market:</strong> ${data.location}</p><p><strong>Shipping Date:</strong> ${data.shippingDate}</p><hr>`;
+        html += '<table class="table table-sm"><thead><tr><th>Variety</th><th>Quantity</th></tr></thead><tbody>';
         data.items.forEach(i => html += `<tr><td>${i.name}</td><td>${i.qty} ${i.unit}</td></tr>`);
-        html += '</table>';
+        html += '</tbody></table>';
         document.getElementById('summaryList').innerHTML = html;
         new bootstrap.Modal(document.getElementById('summaryModal')).show();
     }
 
     function downloadCSV() {
         let csv = "Variety,Quantity,Unit\n";
-        lastOrderData.forEach(i => csv += `${i.name},${i.qty},${i.unit}\n`);
+        lastOrderItems.forEach(i => csv += `"${i.name}",${i.qty},${i.unit}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = `Order_Record_${new Date().toISOString().slice(0,10)}.csv`;
+        link.download = `FWU_Order_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
     }
 </script>
+
 </body>
 </html>
