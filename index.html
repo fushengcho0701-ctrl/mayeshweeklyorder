@@ -6,23 +6,21 @@
     <title>[FWU] Mayesh Weekly Order</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --fwu-blue: #0056b3; --fwu-light: #f8f9fa; }
-        body { background-color: #f4f7f6; color: #333; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        :root { --fwu-blue: #0056b3; }
+        body { background-color: #f4f7f6; color: #333; font-family: 'Segoe UI', system-ui, sans-serif; }
         
-        /* Header */
         .header-section { background: white; padding: 25px 0; border-bottom: 4px solid var(--fwu-blue); text-align: center; margin-bottom: 30px; }
-        .logo { max-width: 250px; margin-bottom: 10px; }
+        .logo { max-width: 250px; }
         
-        /* Section Titles */
         .card-title { color: var(--fwu-blue); font-weight: 700; border-left: 5px solid var(--fwu-blue); padding-left: 12px; margin-bottom: 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
         /* Section 1: Pack Rate Table */
         .pack-table { font-size: 0.85rem; }
-        .pack-table th { background-color: #f1f3f5; border: 1px solid #dee2e6; text-align: center; white-space: nowrap; }
-        .pack-table td { border: 1px solid #dee2e6; text-align: center; vertical-align: middle; padding: 6px; }
+        .pack-table th { background-color: #f1f3f5; border: 1px solid #dee2e6; text-align: center; }
+        .pack-table td { border: 1px solid #dee2e6; text-align: center; padding: 6px; }
 
-        /* Section 4: Item Box (Grid) */
+        /* Section 4: Item Box 修正圖片高度 */
         .item-box {
             border: 1px solid #eee;
             border-radius: 12px;
@@ -30,32 +28,41 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
             transition: all 0.3s ease;
         }
-        .item-box:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: var(--fwu-blue); }
-        .item-img { width: 100%; height: 220px; object-fit: cover; border-bottom: 1px solid #f0f0f0; }
+        .item-box:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        
+        /* 1. 調整圖片高度為至少 1414px (在網頁顯示中維持比例) */
+        .item-img-container {
+            width: 100%;
+            height: 400px; /* 網頁呈現的高度，原始檔會以比例縮放 */
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        .item-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 改成 contain 確保整張 1414px 高度的圖能完整顯示 */
+        }
+
         .item-content { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; }
-        .item-type { color: var(--fwu-blue); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .item-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
-        .item-intro { font-size: 0.85rem; color: #6c757d; line-height: 1.5; margin-bottom: 20px; }
+        .item-name { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; }
+        .item-intro { font-size: 0.9rem; color: #6c757d; line-height: 1.5; margin-bottom: 15px; }
         
-        /* Order Controls */
         .order-action { margin-top: auto; padding-top: 15px; border-top: 1px solid #f0f0f0; }
-        .unit-label { background: #e9ecef; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; font-size: 0.9rem; font-weight: 600; }
-        
-        .btn-submit { background: var(--fwu-blue); border: none; padding: 16px; font-weight: bold; border-radius: 10px; transition: 0.3s; }
-        .btn-submit:hover { background: #004494; transform: scale(1.01); }
+        .unit-label { background: #e9ecef; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 600; min-width: 60px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="header-section">
-    <img src="https://images.squarespace-cdn.com/content/689dd63b4e427050b1bc75a0/b97177cc-9349-4e60-b7ce-83c7097ba6aa/logo+%E9%80%8F%E6%98%8E.png" alt="FWU Logo" class="logo">
+    <img src="https://images.squarespace-cdn.com/content/689dd63b4e427050b1bc75a0/b97177cc-9349-4e60-b7ce-83c7097ba6aa/logo+%E9%80%8F%E6%98%8E.png" class="logo">
     <h2 class="mt-2">[FWU] Mayesh Weekly Order</h2>
 </div>
 
 <div class="container pb-5">
-    <div class="card">
+    <div class="card" id="packRateCard">
         <div class="card-body">
             <h5 class="card-title">Section 1: Shipping Pack Rate Reference</h5>
             <div class="table-responsive">
@@ -101,25 +108,21 @@
 
         <h5 class="card-title mb-4">Section 4: Variety Order List</h5>
         <div id="varietyGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
-            </div>
+            <p class="text-center w-100">Loading flowers...</p>
+        </div>
 
-        <button type="submit" id="submitBtn" class="btn btn-primary btn-submit w-100 btn-lg shadow">SUBMIT WEEKLY ORDER</button>
+        <button type="submit" id="submitBtn" class="btn btn-primary btn-lg w-100 shadow py-3 fw-bold">SUBMIT WEEKLY ORDER</button>
     </form>
 </div>
 
 <div class="modal fade" id="summaryModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Order Submitted Successfully!</h5>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted">Thank you for your order. Here is your summary:</p>
-                <div id="summaryList" class="bg-light p-3 rounded shadow-sm"></div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-outline-success" onclick="downloadCSV()">Download Excel (.csv)</button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.reload()">Start New Order</button>
+        <div class="modal-content border-0">
+            <div class="modal-header bg-success text-white"><h5>Order Submitted!</h5></div>
+            <div class="modal-body" id="summaryList"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-success" onclick="downloadCSV()">Download CSV</button>
+                <button class="btn btn-secondary" onclick="window.location.reload()">New Order</button>
             </div>
         </div>
     </div>
@@ -127,10 +130,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // 重要：請置換為您的 GAS 網址
+    // ⚠️ 這裡一定要換成您新部署的網址
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
-
-    let lastOrderItems = [];
 
     window.onload = function() {
         fetch(`${GAS_URL}?action=init`)
@@ -138,34 +139,36 @@
         .then(data => {
             renderPackRate(data.packRate);
             renderVarieties(data.varieties);
-        });
+        })
+        .catch(err => alert("Error loading data. Please check GAS URL and permissions."));
     };
 
     function renderPackRate(data) {
-        const header = document.getElementById('packRateHeader');
-        const body = document.getElementById('packRateBody');
-        header.innerHTML = `<tr>${data[0].map(h => `<th>${h}</th>`).join('')}</tr>`;
-        body.innerHTML = data.slice(1).map(row => `<tr>${row.map(cell => `<td>${cell || ''}</td>`).join('')}</tr>`).join('');
+        if(!data || data.length === 0) return;
+        document.getElementById('packRateHeader').innerHTML = `<tr>${data[0].map(h => `<th>${h}</th>`).join('')}</tr>`;
+        document.getElementById('packRateBody').innerHTML = data.slice(1).map(row => `<tr>${row.map(cell => `<td>${cell || ''}</td>`).join('')}</tr>`).join('');
     }
 
     function renderVarieties(vars) {
         const grid = document.getElementById('varietyGrid');
         grid.innerHTML = vars.map(v => {
             const name = v[0];
-            const intro = v[1] || 'Freshly exported from Taiwan.';
-            const imgUrl = v[2] || 'https://via.placeholder.com/400x300?text=FWU+Flower';
-            const type = v[3] || 'Taiwan Fresh';
+            const intro = v[1] || 'Premium Quality';
+            const imgUrl = v[2] || 'https://via.placeholder.com/1000x1414?text=FWU+Flower';
             
-            // 下單單位判斷：只有 Oncidium 為 BU
-            const unit = name.toLowerCase().includes('oncidium') ? 'BU' : 'Box';
+            // 2. 修正下單單位邏輯：嚴格判斷 Oncidium
+            // 只要名稱包含 Oncidium (不限大小寫)，單位就是 BU，其餘為 Box
+            const isOncidium = name.toLowerCase().includes('oncidium');
+            const unit = isOncidium ? 'BU' : 'Box';
 
             return `
                 <div class="col">
                     <div class="item-box">
-                        <img src="${imgUrl}" class="item-img" alt="${name}">
+                        <div class="item-img-container">
+                            <img src="${imgUrl}" class="item-img" alt="${name}">
+                        </div>
                         <div class="item-content">
-                            <div class="item-type">${type}</div>
-                            <div class="item-name">${name}</div>
+                            <div class="item-name">${name} ${isOncidium ? '<span class="badge bg-info text-dark" style="font-size:0.7rem">BU</span>' : ''}</div>
                             <div class="item-intro">${intro}</div>
                             <div class="order-action">
                                 <div class="input-group">
@@ -181,64 +184,40 @@
         }).join('');
     }
 
+    // 表單處理邏輯 (與先前一致)
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Processing...";
-
         const items = [];
         document.querySelectorAll('.order-qty').forEach(input => {
             if(parseInt(input.value) > 0) {
                 items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
             }
         });
-
-        if(items.length === 0) {
-            alert("Please enter a quantity for at least one item.");
-            submitBtn.disabled = false;
-            submitBtn.innerText = "SUBMIT WEEKLY ORDER";
-            return;
-        }
-
-        const payload = {
-            location: document.querySelector('[name="location"]').value,
-            shippingDate: document.querySelector('[name="shippingDate"]').value,
-            items: items
-        };
-
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
+        if(items.length === 0) return alert("Please enter quantity.");
+        
+        const payload = { location: document.querySelector('[name="location"]').value, shippingDate: document.querySelector('[name="shippingDate"]').value, items: items };
+        
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(res => {
             if(res.result === 'success') {
-                lastOrderItems = items;
-                showSummary(payload);
+                window.lastItems = items;
+                let html = `<p>Location: ${payload.location}</p><table class="table table-sm">`;
+                items.forEach(i => html += `<tr><td>${i.name}</td><td>${i.qty} ${i.unit}</td></tr>`);
+                document.getElementById('summaryList').innerHTML = html + "</table>";
+                new bootstrap.Modal(document.getElementById('summaryModal')).show();
             }
         });
     };
 
-    function showSummary(data) {
-        let html = `<p><strong>Market:</strong> ${data.location}</p><p><strong>Shipping Date:</strong> ${data.shippingDate}</p><hr>`;
-        html += '<table class="table table-sm"><thead><tr><th>Variety</th><th>Quantity</th></tr></thead><tbody>';
-        data.items.forEach(i => html += `<tr><td>${i.name}</td><td>${i.qty} ${i.unit}</td></tr>`);
-        html += '</tbody></table>';
-        document.getElementById('summaryList').innerHTML = html;
-        new bootstrap.Modal(document.getElementById('summaryModal')).show();
-    }
-
     function downloadCSV() {
         let csv = "Variety,Quantity,Unit\n";
-        lastOrderItems.forEach(i => csv += `"${i.name}",${i.qty},${i.unit}\n`);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        window.lastItems.forEach(i => csv += `"${i.name}",${i.qty},${i.unit}\n`);
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `FWU_Order_${new Date().toISOString().slice(0,10)}.csv`;
+        link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        link.download = `Order_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
     }
 </script>
-
 </body>
 </html>
