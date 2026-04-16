@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[FWU] Mayesh Weekly Order</title>
+    <title>[FWU] Mayesh Weekly Order System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --fwu-main: #95c51b; --fwu-dark: #7aa314; }
@@ -12,7 +12,7 @@
         /* Header & Nav */
         .header-section { background: white; padding: 30px 0 10px 0; border-bottom: 5px solid var(--fwu-main); text-align: center; margin-bottom: 20px; }
         .header-title { color: var(--fwu-main); font-weight: 800; letter-spacing: 2px; margin-bottom: 20px; }
-        .nav-pills .nav-link { color: #666; font-weight: 600; border-radius: 30px; padding: 10px 30px; margin: 0 10px; border: 1px solid #ddd; }
+        .nav-pills .nav-link { color: #666; font-weight: 600; border-radius: 30px; padding: 10px 25px; margin: 0 5px; border: 1px solid #ddd; font-size: 0.9rem; }
         .nav-pills .nav-link.active { background-color: var(--fwu-main); border-color: var(--fwu-main); color: white; }
 
         .card-title { color: var(--fwu-main); font-weight: 700; border-left: 5px solid var(--fwu-main); padding-left: 12px; margin-bottom: 20px; }
@@ -20,10 +20,7 @@
 
         /* Compact Tool Box */
         .tool-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--fwu-main); }
-        .result-inline { 
-            background: var(--fwu-main); color: white; border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem;
-        }
+        .result-inline { background: var(--fwu-main); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem; }
 
         /* Grid Setup - Force 4 Columns */
         .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
@@ -44,6 +41,10 @@
         .unit-bu { color: white; background: var(--fwu-main); border-color: var(--fwu-main); }
 
         .btn-submit { background-color: var(--fwu-main); border: none; padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
+
+        /* History Table Styles */
+        .table-history thead { background-color: var(--fwu-main); color: white; }
+        .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -53,6 +54,7 @@
     <ul class="nav nav-pills justify-content-center mb-3" id="mainTab" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#catalogTab">1. CATALOG</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#orderTab">2. PLACE ORDER</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#historyTab" onclick="loadHistory()">3. ORDER HISTORY</button></li>
     </ul>
 </div>
 
@@ -83,8 +85,7 @@
                     </div>
                 </div>
             </div>
-
-            <h5 class="card-title">Product Catalog</h5>
+            <h5 class="card-title">Product Catalog (Unique Varieties)</h5>
             <div id="catalogGrid" class="row g-3 row-cols-custom-4"></div>
         </div>
 
@@ -118,18 +119,46 @@
                 </div>
             </form>
         </div>
+
+        <div class="tab-pane fade" id="historyTab">
+            <div class="card mx-auto" style="max-width: 1100px;">
+                <div class="card-body">
+                    <h5 class="card-title">Global Order Records</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Select Shipping Date:</label>
+                            <select id="historyDateSelect" class="form-select form-select-lg" onchange="filterHistory()">
+                                <option value="">-- Loading Dates... --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="historyContent" class="table-responsive">
+                        <div class="text-center py-5 text-muted">Please select a shipping date to view summarized orders.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <div class="modal fade" id="summaryModal" data-bs-backdrop="static" tabindex="-1">
-    <div class="modal-dialog modal-lg"><div class="modal-content border-0"><div class="modal-header bg-success text-white"><h5>Order Confirmed</h5></div><div class="modal-body p-4" id="summaryList"></div><div class="modal-footer"><button class="btn btn-outline-success fw-bold" onclick="downloadCSV()">Download CSV</button><button class="btn btn-secondary" onclick="window.location.reload()">New Order</button></div></div></div>
+    <div class="modal-dialog modal-lg"><div class="modal-content border-0">
+        <div class="modal-header bg-success text-white"><h5>Order Confirmed</h5></div>
+        <div class="modal-body p-4" id="summaryList"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-success fw-bold" onclick="downloadCSV()">Download CSV</button>
+            <button class="btn btn-secondary" onclick="window.location.reload()">New Order</button>
+        </div>
+    </div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let packRateData = [];
-    window.lastOrderInfo = {}; // 修正全域變數名稱以對應下載函式
+    let allOrders = [];
+    window.lastOrderInfo = {};
 
     function getOrderUnit(category) {
         return (category && category.toString().includes("Oncidium")) ? "BU" : "Box";
@@ -137,14 +166,11 @@
 
     function getPackUnit(category) {
         const cat = category ? category.toString() : "";
-        if (cat.includes("Vanda") || cat.includes("Anthurium")) return "Stem";
-        return "BU";
+        return (cat.includes("Vanda") || cat.includes("Anthurium")) ? "Stem" : "BU";
     }
 
     window.onload = function() {
-        fetch(`${GAS_URL}?action=init`)
-        .then(res => res.json())
-        .then(data => {
+        fetch(`${GAS_URL}?action=init`).then(res => res.json()).then(data => {
             packRateData = data.packRate;
             initTool(data.packRate);
             renderCatalogGrid(data.varieties);
@@ -186,7 +212,6 @@
             seenImgs.add(v[2]);
             return true;
         });
-
         grid.innerHTML = filteredVars.map(v => `
             <div class="col">
                 <div class="item-box shadow-sm">
@@ -223,13 +248,78 @@
         }).join('');
     }
 
+    // --- History Logic ---
+    function loadHistory() {
+        const historyDiv = document.getElementById('historyContent');
+        historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Syncing Records...</p></div>';
+        
+        fetch(`${GAS_URL}?action=getOrders`)
+        .then(res => res.json())
+        .then(data => {
+            allOrders = data.slice(1);
+            const rawDates = [...new Set(allOrders.map(row => row[2]))];
+            const sortedDates = rawDates.filter(d => d).sort().reverse();
+            const dateSelect = document.getElementById('historyDateSelect');
+            
+            if(sortedDates.length === 0) {
+                dateSelect.innerHTML = '<option value="">-- No Orders Found --</option>';
+                historyDiv.innerHTML = '<div class="text-center py-5">No history yet.</div>';
+                return;
+            }
+
+            dateSelect.innerHTML = '<option value="">-- Select Shipping Date --</option>';
+            sortedDates.forEach(d => {
+                const displayDate = new Date(d).toLocaleDateString('en-CA'); // YYYY-MM-DD
+                dateSelect.innerHTML += `<option value="${d}">${displayDate}</option>`;
+            });
+            historyDiv.innerHTML = '<div class="text-center py-5 text-muted">Select a date above to view Loc-specific orders.</div>';
+        });
+    }
+
+    function filterHistory() {
+        const selectedDate = document.getElementById('historyDateSelect').value;
+        const historyDiv = document.getElementById('historyContent');
+        if(!selectedDate) return;
+
+        const filtered = allOrders.filter(row => row[2] == selectedDate);
+        if(filtered.length === 0) {
+            historyDiv.innerHTML = '<div class="text-center py-5">No data for this date.</div>';
+            return;
+        }
+
+        const locGroups = {};
+        filtered.forEach(row => {
+            const loc = row[1], varName = row[3], qtyStr = row[4];
+            if(!locGroups[loc]) locGroups[loc] = [];
+            locGroups[loc].push({ name: varName, qty: qtyStr });
+        });
+
+        let html = `<table class="table table-bordered table-history">
+                        <thead><tr><th>Location</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
+                        <tbody>`;
+        
+        for(let loc in locGroups) {
+            const rowCount = locGroups[loc].length;
+            locGroups[loc].forEach((item, index) => {
+                html += `<tr>`;
+                if(index === 0) {
+                    html += `<td rowspan="${rowCount}" class="align-middle fw-bold"><span class="badge-loc">${loc}</span></td>`;
+                }
+                html += `<td>${item.name}</td><td class="text-end fw-bold text-success">${item.qty}</td></tr>`;
+            });
+        }
+        html += `</tbody></table>`;
+        historyDiv.innerHTML = html;
+    }
+
+    // --- Submission & CSV ---
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         const items = [];
         document.querySelectorAll('.order-qty').forEach(input => {
             if(parseInt(input.value) > 0) items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
         });
-        if(items.length === 0) return alert("Select at least one item.");
+        if(items.length === 0) return alert("Please select at least one item.");
         
         const payload = { 
             location: document.getElementById('inputLocation').value, 
@@ -238,7 +328,7 @@
         };
         
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(res => {
-            window.lastOrderInfo = payload; // 存入全域變數
+            window.lastOrderInfo = payload;
             let html = `<h6>Market: ${payload.location}</h6><table class="table table-sm">`;
             items.forEach(i => html += `<tr><td>${i.name}</td><td class="text-end"><strong>${i.qty} ${i.unit}</strong></td></tr>`);
             document.getElementById('summaryList').innerHTML = html + "</table>";
@@ -248,15 +338,10 @@
 
     function downloadCSV() {
         const info = window.lastOrderInfo;
-        // 使用反引號 ` ` 確保變數能被正確解析
         let csv = "\uFEFF"; 
-        csv += `Location,${info.location}\n`;
-        csv += `Shipping Date,${info.shippingDate}\n\n`;
+        csv += `Location,${info.location}\nShipping Date,${info.shippingDate}\n\n`;
         csv += "Variety,Qty,Unit\n";
-        
-        info.items.forEach(i => {
-            csv += `"${i.name}",${i.qty},${i.unit}\n`;
-        });
+        info.items.forEach(i => { csv += `"${i.name}",${i.qty},${i.unit}\n`; });
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
