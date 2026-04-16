@@ -129,13 +129,12 @@
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let packRateData = [];
+    window.lastOrderInfo = {}; // 修正全域變數名稱以對應下載函式
 
-    // 單位邏輯：只有 Oncidium 顯示 BU，其餘均顯示 Box (Place Order 專用)
     function getOrderUnit(category) {
         return (category && category.toString().includes("Oncidium")) ? "BU" : "Box";
     }
 
-    // Pack Rate 查詢工具專用單位邏輯
     function getPackUnit(category) {
         const cat = category ? category.toString() : "";
         if (cat.includes("Vanda") || cat.includes("Anthurium")) return "Stem";
@@ -179,7 +178,6 @@
         document.getElementById('rateResult').classList.remove('d-none');
     }
 
-    // Catalog 渲染：過濾重複的 img url
     function renderCatalogGrid(vars) {
         const grid = document.getElementById('catalogGrid');
         const seenImgs = new Set();
@@ -201,7 +199,6 @@
             </div>`).join('');
     }
 
-    // Place Order 渲染：顯示所有項目並標註單位
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
@@ -226,7 +223,6 @@
         }).join('');
     }
 
-    // 提交與下載邏輯 (維持不變)
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         const items = [];
@@ -234,9 +230,15 @@
             if(parseInt(input.value) > 0) items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
         });
         if(items.length === 0) return alert("Select at least one item.");
-        const payload = { location: document.getElementById('inputLocation').value, shippingDate: document.getElementById('inputDate').value, items: items };
+        
+        const payload = { 
+            location: document.getElementById('inputLocation').value, 
+            shippingDate: document.getElementById('inputDate').value, 
+            items: items 
+        };
+        
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(res => {
-            window.lastOrder = payload;
+            window.lastOrderInfo = payload; // 存入全域變數
             let html = `<h6>Market: ${payload.location}</h6><table class="table table-sm">`;
             items.forEach(i => html += `<tr><td>${i.name}</td><td class="text-end"><strong>${i.qty} ${i.unit}</strong></td></tr>`);
             document.getElementById('summaryList').innerHTML = html + "</table>";
@@ -245,12 +247,21 @@
     };
 
     function downloadCSV() {
-        const info = window.lastOrder;
-        let csv = "\uFEFFLocation,${info.location}\nDate,${info.shippingDate}\n\nVariety,Qty,Unit\n";
-        info.items.forEach(i => csv += `"${i.name}",${i.qty},${i.unit}\n`);
+        const info = window.lastOrderInfo;
+        // 使用反引號 ` ` 確保變數能被正確解析
+        let csv = "\uFEFF"; 
+        csv += `Location,${info.location}\n`;
+        csv += `Shipping Date,${info.shippingDate}\n\n`;
+        csv += "Variety,Qty,Unit\n";
+        
+        info.items.forEach(i => {
+            csv += `"${i.name}",${i.qty},${i.unit}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-        link.download = `Order_${info.location}.csv`;
+        link.href = URL.createObjectURL(blob);
+        link.download = `Order_${info.location}_${info.shippingDate}.csv`.replace(/\s+/g, '_');
         link.click();
     }
 </script>
