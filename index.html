@@ -9,130 +9,125 @@
         :root { --fwu-main: #95c51b; --fwu-dark: #7aa314; }
         body { background-color: #f4f7f6; color: #333; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
         
-        /* Header 區域 */
-        .header-section { background: white; padding: 40px 0; border-bottom: 5px solid var(--fwu-main); text-align: center; margin-bottom: 30px; }
-        .header-title { color: var(--fwu-main); font-weight: 800; letter-spacing: 2px; margin: 0; }
+        /* Header & Navigation */
+        .header-section { background: white; padding: 30px 0 10px 0; border-bottom: 5px solid var(--fwu-main); text-align: center; margin-bottom: 20px; }
+        .header-title { color: var(--fwu-main); font-weight: 800; letter-spacing: 2px; margin-bottom: 20px; }
         
-        /* 區塊標題 */
+        .nav-pills .nav-link { color: #666; font-weight: 600; border-radius: 30px; padding: 10px 30px; margin: 0 10px; border: 1px solid #ddd; }
+        .nav-pills .nav-link.active { background-color: var(--fwu-main); border-color: var(--fwu-main); color: white; }
+
+        /* Section Titles */
         .card-title { color: var(--fwu-main); font-weight: 700; border-left: 5px solid var(--fwu-main); padding-left: 12px; margin-bottom: 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
-        /* Section 1: Pack Rate 表格 */
-        .pack-table { font-size: 0.85rem; }
-        .pack-table th { background-color: #f1f3f5; border: 1px solid #dee2e6; text-align: center; white-space: nowrap; }
-        .pack-table td { border: 1px solid #dee2e6; text-align: center; padding: 6px; vertical-align: middle; }
-
-        /* Section 4: 產品卡片設計 */
-        .item-box {
-            border: 1px solid #eee;
-            border-radius: 12px;
-            background: white;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: all 0.3s ease;
+        /* Catalog - Pack Rate UX Optimized (Grid Cards) */
+        .pack-grid-box { 
+            background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; 
+            text-align: center; height: 100%; transition: 0.3s;
         }
+        .pack-grid-box:hover { border-color: var(--fwu-main); background: #f9fff0; }
+        .pack-variety { font-weight: 700; color: #333; font-size: 1rem; margin-bottom: 5px; }
+        .pack-spec { color: var(--fwu-main); font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+        .pack-details { font-size: 0.8rem; color: #666; background: #f1f1f1; border-radius: 5px; padding: 5px; }
+
+        /* Product Box */
+        .item-box { border: 1px solid #eee; border-radius: 12px; background: white; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: 0.3s; }
         .item-box:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        
-        .item-img-container {
-            width: 100%;
-            height: 480px; 
-            overflow: hidden;
-            background: #ffffff;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .item-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
+        .item-img-container { width: 100%; height: 480px; overflow: hidden; background: #fff; border-bottom: 1px solid #f0f0f0; }
+        .item-img { width: 100%; height: 100%; object-fit: contain; }
         .item-content { padding: 18px; flex-grow: 1; display: flex; flex-direction: column; }
-        .item-type { color: var(--fwu-main); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .item-type { color: var(--fwu-main); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
         .item-name { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
-        .item-intro { font-size: 0.85rem; color: #6c757d; line-height: 1.5; margin-bottom: 20px; }
+        .item-intro { font-size: 0.85rem; color: #6c757d; line-height: 1.5; margin-bottom: 15px; }
         
-        /* 下單控制區 */
+        /* Order Input */
         .order-action { margin-top: auto; padding-top: 15px; border-top: 1px solid #f0f0f0; }
-        .unit-label { background: #f8f9fa; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 800; min-width: 65px; text-align: center; color: #333; }
+        .unit-label { background: #f8f9fa; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.75rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 800; min-width: 65px; text-align: center; }
         .unit-bu { color: white; background: var(--fwu-main); border-color: var(--fwu-main); }
 
-        /* 按鈕顏色 */
-        .btn-primary { background-color: var(--fwu-main); border-color: var(--fwu-main); }
-        .btn-primary:hover { background-color: var(--fwu-dark); border-color: var(--fwu-dark); }
-        .btn-submit { padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; }
+        .btn-submit { background-color: var(--fwu-main); border: none; padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
+        .btn-submit:hover { background-color: var(--fwu-dark); color: white; }
     </style>
 </head>
 <body>
 
-<div class="header-section">
+<div class="header-section shadow-sm">
     <h1 class="header-title text-uppercase">[FWU] Mayesh Weekly Order</h1>
+    <ul class="nav nav-pills justify-content-center mb-3" id="mainTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="catalog-tab" data-bs-toggle="pill" data-bs-target="#catalog" type="button">1. CATALOG</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="order-tab" data-bs-toggle="pill" data-bs-target="#order" type="button">2. PLACE ORDER</button>
+        </li>
+    </ul>
 </div>
 
 <div class="container pb-5">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Section 1: Shipping Pack Rate Reference</h5>
-            <div class="table-responsive">
-                <table class="table pack-table table-sm mb-0">
-                    <thead id="packRateHeader"></thead>
-                    <tbody id="packRateBody"></tbody>
-                </table>
+    <div class="tab-content" id="mainTabContent">
+        
+        <div class="tab-pane fade show active" id="catalog" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Shipping Pack Rate Reference</h5>
+                    <div id="packRateGrid" class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+                        </div>
+                </div>
             </div>
+
+            <h5 class="card-title mb-4">Variety Gallery</h5>
+            <div id="catalogGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                </div>
         </div>
+
+        <div class="tab-pane fade" id="order" role="tabpanel">
+            <form id="orderForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Location Choosing</h5>
+                                <select name="location" id="inputLocation" class="form-select form-select-lg" required>
+                                    <option value="">-- Select Your Market --</option>
+                                    <option value="Loc1">Loc1-- LA Market</option>
+                                    <option value="Loc3">Loc3-- Orange County</option>
+                                    <option value="Loc5">Loc5-- Carlsbad</option>
+                                    <option value="Loc6">Loc6-- Riverside</option>
+                                    <option value="Loc9">Loc9-- LAX</option>
+                                    <option value="Loc10">Loc10-- Phoenix</option>
+                                    <option value="Loc12">Loc12-- Oxnard</option>
+                                    <option value="Loc19">Loc19-- Portland</option>
+                                    <option value="Loc21">Loc21-- Seattle</option>
+                                    <option value="Loc25">Loc25-- San Francisco</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Expected Shipping Date</h5>
+                                <input type="date" name="shippingDate" id="inputDate" class="form-control form-control-lg" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="card-title mb-4">Quick Order List</h5>
+                <div id="orderGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+                    </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-submit w-100 shadow">CONFIRM & SUBMIT ORDER</button>
+            </form>
+        </div>
+
     </div>
-
-    <form id="orderForm">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Section 2: Location Choosing</h5>
-                        <select name="location" id="inputLocation" class="form-select form-select-lg" required>
-                            <option value="">-- Select Your Market --</option>
-                            <option value="Loc1">Loc1-- LA Market</option>
-                            <option value="Loc3">Loc3-- Orange County</option>
-                            <option value="Loc5">Loc5-- Carlsbad</option>
-                            <option value="Loc6">Loc6-- Riverside</option>
-                            <option value="Loc9">Loc9-- LAX</option>
-                            <option value="Loc10">Loc10-- Phoenix</option>
-                            <option value="Loc12">Loc12-- Oxnard</option>
-                            <option value="Loc19">Loc19-- Portland</option>
-                            <option value="Loc21">Loc21-- Seattle</option>
-                            <option value="Loc25">Loc25-- San Francisco</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Section 3: Expected Shipping Date</h5>
-                        <input type="date" name="shippingDate" id="inputDate" class="form-control form-control-lg" required>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <h5 class="card-title mb-4">Section 4: Variety Order List</h5>
-        <div id="varietyGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
-            <div class="text-center w-100 py-5">
-                <div class="spinner-border text-success" role="status"></div>
-                <p class="mt-2 text-muted">Fetching latest varieties...</p>
-            </div>
-        </div>
-
-        <button type="submit" id="submitBtn" class="btn btn-primary btn-submit w-100 shadow">SUBMIT WEEKLY ORDER</button>
-    </form>
 </div>
 
 <div class="modal fade" id="summaryModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Order Submitted!</h5>
-            </div>
+            <div class="modal-header bg-success text-white"><h5>Order Submitted!</h5></div>
             <div class="modal-body p-4" id="summaryList"></div>
             <div class="modal-footer bg-light">
                 <button class="btn btn-outline-success fw-bold" onclick="downloadCSV()">Download Record (CSV)</button>
@@ -145,97 +140,90 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
-
-    // 用於記錄全域狀態
     window.lastOrderInfo = { location: '', date: '', items: [] };
 
     window.onload = function() {
         fetch(`${GAS_URL}?action=init`)
         .then(res => res.json())
         .then(data => {
-            renderPackRate(data.packRate);
+            renderPackRateOptimized(data.packRate);
             renderVarieties(data.varieties);
         });
     };
 
-    function renderPackRate(data) {
-        if(!data || data.length === 0) return;
-        document.getElementById('packRateHeader').innerHTML = `<tr>${data[0].map(h => `<th>${h}</th>`).join('')}</tr>`;
-        document.getElementById('packRateBody').innerHTML = data.slice(1).map(row => `<tr>${row.map(cell => `<td>${cell || ''}</td>`).join('')}</tr>`).join('');
+    function renderPackRateOptimized(data) {
+        const grid = document.getElementById('packRateGrid');
+        // 假設截圖中的欄位順序：0:Variety, 1:Spec, 2:Box1, 3:Rate1, 4:Box2, 5:Rate2
+        grid.innerHTML = data.slice(1).map(r => `
+            <div class="col">
+                <div class="pack-grid-box">
+                    <div class="pack-variety">${r[0]}</div>
+                    <div class="pack-spec">${r[1]}</div>
+                    <div class="pack-details">
+                        ${r[2]}: ${r[3]}<br>
+                        ${r[4] ? `${r[4]}: ${r[5]}` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
     function renderVarieties(vars) {
-        const grid = document.getElementById('varietyGrid');
-        grid.innerHTML = vars.map(v => {
-            const name = v[0];     
-            const intro = v[1];    
-            const imgUrl = v[2];   
-            const category = v[3]; 
-            
+        const catalogGrid = document.getElementById('catalogGrid');
+        const orderGrid = document.getElementById('orderGrid');
+
+        let catalogHtml = '';
+        let orderHtml = '';
+
+        vars.forEach(v => {
+            const name = v[0], intro = v[1], imgUrl = v[2], category = v[3];
             const isOncidium = category && category.toString().toLowerCase().includes('oncidium');
             const unit = isOncidium ? 'BU' : 'Box';
+            const img = imgUrl || 'https://via.placeholder.com/1000x1414?text=Flower';
 
-            return `
-                <div class="col">
-                    <div class="item-box">
-                        <div class="item-img-container">
-                            <img src="${imgUrl || 'https://via.placeholder.com/1000x1414?text=Flower'}" class="item-img" alt="${name}">
-                        </div>
-                        <div class="item-content">
-                            <div class="item-type">${category || 'Variety'}</div>
-                            <div class="item-name">${name}</div>
-                            <div class="item-intro">${intro || ''}</div>
-                            <div class="order-action">
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white fw-bold">Qty</span>
-                                    <input type="number" class="form-control order-qty" data-name="${name}" data-unit="${unit}" min="0" value="0">
-                                    <span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span>
-                                </div>
+            const commonCard = `
+                <div class="item-box">
+                    <div class="item-img-container"><img src="${img}" class="item-img"></div>
+                    <div class="item-content">
+                        <div class="item-type">${category || ''}</div>
+                        <div class="item-name">${name}</div>
+                        <div class="item-intro">${intro || ''}</div>
+            `;
+
+            catalogHtml += commonCard + `</div></div></div>`;
+            
+            orderHtml += commonCard + `
+                        <div class="order-action">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white fw-bold">Qty</span>
+                                <input type="number" class="form-control order-qty" data-name="${name}" data-unit="${unit}" min="0" value="0">
+                                <span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    document.getElementById('orderForm').onsubmit = function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = "Processing...";
-
-        const items = [];
-        document.querySelectorAll('.order-qty').forEach(input => {
-            if(parseInt(input.value) > 0) {
-                items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
-            }
+                    </div></div></div>`;
         });
 
-        if(items.length === 0) {
-            alert("No items selected.");
-            btn.disabled = false;
-            btn.innerText = "SUBMIT WEEKLY ORDER";
-            return;
-        }
+        catalogGrid.innerHTML = catalogHtml;
+        orderGrid.innerHTML = orderHtml;
+    }
 
-        const payload = {
-            location: document.getElementById('inputLocation').value,
-            shippingDate: document.getElementById('inputDate').value,
-            items: items
-        };
+    // 提交與下載邏輯 (維持先前正確版本)
+    document.getElementById('orderForm').onsubmit = function(e) {
+        e.preventDefault();
+        const items = [];
+        document.querySelectorAll('.order-qty').forEach(input => {
+            if(parseInt(input.value) > 0) items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
+        });
+        if(items.length === 0) return alert("Select at least one item.");
 
+        const payload = { location: document.getElementById('inputLocation').value, shippingDate: document.getElementById('inputDate').value, items: items };
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) })
-        .then(res => res.json())
-        .then(res => {
+        .then(res => res.json()).then(res => {
             if(res.result === 'success') {
-                // 存入全域變數供下載使用
                 window.lastOrderInfo = payload;
-                
                 let html = `<p><strong>Market:</strong> ${payload.location}</p><p><strong>Shipping Date:</strong> ${payload.shippingDate}</p><hr><table class="table">`;
-                html += '<thead><tr><th>Variety</th><th class="text-end">Qty</th></tr></thead><tbody>';
                 items.forEach(i => html += `<tr><td>${i.name}</td><td class="text-end"><strong>${i.qty} ${i.unit}</strong></td></tr>`);
-                document.getElementById('summaryList').innerHTML = html + "</tbody></table>";
+                document.getElementById('summaryList').innerHTML = html + "</table>";
                 new bootstrap.Modal(document.getElementById('summaryModal')).show();
             }
         });
@@ -243,24 +231,11 @@
 
     function downloadCSV() {
         const info = window.lastOrderInfo;
-        // 加入 BOM 避免 Excel 開啟中文或特殊字元亂碼
-        let csv = "\uFEFF"; 
-        // 加入地點與日期的表頭資訊
-        csv += `Location,${info.location}\n`;
-        csv += `Shipping Date,${info.date || info.shippingDate}\n\n`;
-        // 下單品項表頭
-        csv += "Variety,Quantity,Unit\n";
-        
-        info.items.forEach(i => {
-            csv += `"${i.name}",${i.qty},${i.unit}\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        let csv = "\uFEFFLocation,${info.location}\nShipping Date,${info.date || info.shippingDate}\n\nVariety,Quantity,Unit\n";
+        info.items.forEach(i => csv += `"${i.name}",${i.qty},${i.unit}\n`);
         const link = document.createElement("a");
-        const fileName = `FWU_Order_${info.location}_${info.shippingDate}.csv`.replace(/\s+/g, '_');
-        
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
+        link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        link.download = `FWU_Order_${info.location}_${info.shippingDate}.csv`;
         link.click();
     }
 </script>
