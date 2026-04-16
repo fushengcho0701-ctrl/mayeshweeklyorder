@@ -18,12 +18,14 @@
         .card-title { color: var(--fwu-main); font-weight: 700; border-left: 5px solid var(--fwu-main); padding-left: 12px; margin-bottom: 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
-        /* Interactive Tool (Catalog Only) */
-        .tool-box { background: #fff; padding: 25px; border-radius: 12px; border: 2px solid var(--fwu-main); }
-        .result-display { background: var(--fwu-main); color: white; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px; }
-        .result-val { font-size: 2.5rem; font-weight: 800; display: block; }
+        /* Compact Tool Box */
+        .tool-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--fwu-main); }
+        .result-inline { 
+            background: var(--fwu-main); color: white; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem;
+        }
 
-        /* Grid Layout: Force 4 columns on large screens */
+        /* Grid Setup - Force 4 Columns */
         .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
         @media (max-width: 1200px) { .row-cols-custom-4 > .col { width: 33.33%; } }
         @media (max-width: 768px) { .row-cols-custom-4 > .col { width: 50%; } }
@@ -34,12 +36,12 @@
         .img-container { width: 100%; height: 350px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
         .img-item { width: 100%; height: 100%; object-fit: contain; }
         .box-body { padding: 15px; flex-grow: 1; }
-        .box-variety { color: var(--fwu-main); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .box-variety { color: var(--fwu-main); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
         .box-item-name { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-top: 5px; }
         
         .order-control { padding: 10px 15px; border-top: 1px solid #eee; background: #fafafa; }
         .unit-label { background: #f8f9fa; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.5rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 800; min-width: 60px; text-align: center; font-size: 0.85rem; }
-        .unit-special { color: white; background: var(--fwu-main); border-color: var(--fwu-main); }
+        .unit-bu { color: white; background: var(--fwu-main); border-color: var(--fwu-main); }
 
         .btn-submit { background-color: var(--fwu-main); border: none; padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
     </style>
@@ -58,31 +60,31 @@
     <div class="tab-content">
         
         <div class="tab-pane fade show active" id="catalogTab">
-            <div class="card mb-4 mx-auto" style="max-width: 900px;">
+            <div class="card mb-4 mx-auto" style="max-width: 1100px;">
                 <div class="card-body tool-box">
-                    <h5 class="card-title text-center">Packing Rate Reference Tool</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
                             <label class="form-label small fw-bold">1. Category</label>
                             <select id="toolVariety" class="form-select" onchange="updateSpecOptions()">
-                                <option value="">-- Select Category --</option>
+                                <option value="">-- Choose Category --</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label small fw-bold">2. Specification</label>
                             <select id="toolSpec" class="form-select" disabled onchange="calculateRate()">
                                 <option value="">-- Select Spec --</option>
                             </select>
                         </div>
-                    </div>
-                    <div id="rateResult" class="result-display d-none">
-                        <small class="text-uppercase opacity-75 fw-bold">Standard Packing Rate</small>
-                        <span class="result-val" id="finalRate">-</span>
+                        <div class="col-md-4">
+                            <div id="rateResult" class="result-inline d-none">
+                                <span id="finalRate">-</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <h5 class="card-title">Variety Gallery (48 Items)</h5>
+            <h5 class="card-title">Product Catalog</h5>
             <div id="catalogGrid" class="row g-3 row-cols-custom-4"></div>
         </div>
 
@@ -110,12 +112,9 @@
                         <input type="date" name="shippingDate" id="inputDate" class="form-control" required>
                     </div></div></div>
                 </div>
-
-                <h5 class="card-title">Select Items & Quantity</h5>
                 <div id="orderGrid" class="row g-3 row-cols-custom-4 mb-5"></div>
-
                 <div class="text-center">
-                    <button type="submit" id="submitBtn" class="btn btn-submit px-5 shadow">CONFIRM & SUBMIT ORDER</button>
+                    <button type="submit" id="submitBtn" class="btn btn-submit px-5 shadow">SUBMIT WEEKLY ORDER</button>
                 </div>
             </form>
         </div>
@@ -131,21 +130,14 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let packRateData = [];
 
-    // 下單單位判定邏輯 (用於 Place Order)
+    // 單位邏輯：只有 Oncidium 顯示 BU，其餘均顯示 Box (Place Order 專用)
     function getOrderUnit(category) {
-        const cat = category ? category.toString().trim() : "";
-        // 蝴蝶蘭按箱下單
-        if (cat.includes("Phalaenopsis")) return "Box";
-        // 文心蘭、洋桔梗、千代蘭等按把下單
-        if (cat.includes("Oncidium") || cat.includes("Eustoma") || cat.includes("Epidendrum") || cat.includes("Renanthera")) return "BU";
-        // 萬代蘭、火鶴按支下單
-        if (cat.includes("Vanda") || cat.includes("Anthurium")) return "Stem";
-        return "Box";
+        return (category && category.toString().includes("Oncidium")) ? "BU" : "Box";
     }
 
-    // 裝箱率參考單位 (用於 Catalog Tool)
+    // Pack Rate 查詢工具專用單位邏輯
     function getPackUnit(category) {
-        const cat = category ? category.toString().trim() : "";
+        const cat = category ? category.toString() : "";
         if (cat.includes("Vanda") || cat.includes("Anthurium")) return "Stem";
         return "BU";
     }
@@ -156,8 +148,8 @@
         .then(data => {
             packRateData = data.packRate;
             initTool(data.packRate);
-            renderGrid(data.varieties, 'catalogGrid', false);
-            renderGrid(data.varieties, 'orderGrid', true);
+            renderCatalogGrid(data.varieties);
+            renderOrderGrid(data.varieties);
         });
     };
 
@@ -187,40 +179,61 @@
         document.getElementById('rateResult').classList.remove('d-none');
     }
 
-    function renderGrid(vars, containerId, isOrder) {
-        const grid = document.getElementById(containerId);
+    // Catalog 渲染：過濾重複的 img url
+    function renderCatalogGrid(vars) {
+        const grid = document.getElementById('catalogGrid');
+        const seenImgs = new Set();
+        const filteredVars = vars.filter(v => {
+            if (seenImgs.has(v[2])) return false;
+            seenImgs.add(v[2]);
+            return true;
+        });
+
+        grid.innerHTML = filteredVars.map(v => `
+            <div class="col">
+                <div class="item-box shadow-sm">
+                    <div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div>
+                    <div class="box-body">
+                        <div class="box-variety">${v[3] || ''}</div>
+                        <div class="box-item-name">${v[0]}</div>
+                    </div>
+                </div>
+            </div>`).join('');
+    }
+
+    // Place Order 渲染：顯示所有項目並標註單位
+    function renderOrderGrid(vars) {
+        const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
-            const name = v[0], intro = v[1], img = v[2], type = v[3];
-            const unit = getOrderUnit(type);
+            const unit = getOrderUnit(v[3]);
             return `
                 <div class="col">
                     <div class="item-box shadow-sm">
-                        <div class="img-container"><img src="${img || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div>
+                        <div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div>
                         <div class="box-body">
-                            <div class="box-variety">${type || ''}</div>
-                            <div class="box-item-name">${name}</div>
-                            <p class="text-muted small mb-0" style="font-size:0.75rem">${intro || ''}</p>
+                            <div class="box-variety">${v[3] || ''}</div>
+                            <div class="box-item-name">${v[0]}</div>
                         </div>
-                        ${isOrder ? `
                         <div class="order-control">
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text bg-white fw-bold">Qty</span>
-                                <input type="number" class="form-control order-qty" data-name="${name}" data-unit="${unit}" min="0" value="0">
-                                <span class="unit-label ${unit !== 'Box' ? 'unit-special' : ''}">${unit}</span>
+                                <input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0">
+                                <span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span>
                             </div>
-                        </div>` : ''}
+                        </div>
                     </div>
                 </div>`;
         }).join('');
     }
 
+    // 提交與下載邏輯 (維持不變)
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         const items = [];
         document.querySelectorAll('.order-qty').forEach(input => {
             if(parseInt(input.value) > 0) items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
         });
-        if(items.length === 0) return alert("Please enter quantity for items.");
+        if(items.length === 0) return alert("Select at least one item.");
         const payload = { location: document.getElementById('inputLocation').value, shippingDate: document.getElementById('inputDate').value, items: items };
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(res => {
             window.lastOrder = payload;
