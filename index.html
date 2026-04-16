@@ -22,13 +22,12 @@
         .tool-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--fwu-main); }
         .result-inline { background: var(--fwu-main); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem; }
 
-        /* Grid Setup - Force 4 Columns */
+        /* Grid Setup */
         .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
         @media (max-width: 1200px) { .row-cols-custom-4 > .col { width: 33.33%; } }
         @media (max-width: 768px) { .row-cols-custom-4 > .col { width: 50%; } }
         @media (max-width: 576px) { .row-cols-custom-4 > .col { width: 100%; } }
 
-        /* Item Box */
         .item-box { border-radius: 12px; overflow: hidden; background: white; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
         .img-container { width: 100%; height: 350px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
         .img-item { width: 100%; height: 100%; object-fit: contain; }
@@ -45,6 +44,7 @@
         /* History Table Styles */
         .table-history thead { background-color: var(--fwu-main); color: white; }
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
+        .ts-cell { font-size: 0.75rem; color: #888; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -77,15 +77,11 @@
                                 <option value="">-- Select Spec --</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <div id="rateResult" class="result-inline d-none">
-                                <span id="finalRate">-</span>
-                            </div>
-                        </div>
+                        <div class="col-md-4"><div id="rateResult" class="result-inline d-none"><span id="finalRate">-</span></div></div>
                     </div>
                 </div>
             </div>
-            <h5 class="card-title">Product Catalog (Unique Varieties)</h5>
+            <h5 class="card-title">Product Catalog</h5>
             <div id="catalogGrid" class="row g-3 row-cols-custom-4"></div>
         </div>
 
@@ -123,17 +119,16 @@
         <div class="tab-pane fade" id="historyTab">
             <div class="card mx-auto" style="max-width: 1100px;">
                 <div class="card-body">
-                    <h5 class="card-title">Global Order Records</h5>
-                    <div class="row mb-4">
+                    <h5 class="card-title">Order Records</h5> <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Select Shipping Date:</label>
                             <select id="historyDateSelect" class="form-select form-select-lg" onchange="filterHistory()">
-                                <option value="">-- Loading Dates... --</option>
+                                <option value="">-- Loading... --</option>
                             </select>
                         </div>
                     </div>
                     <div id="historyContent" class="table-responsive">
-                        <div class="text-center py-5 text-muted">Please select a shipping date to view summarized orders.</div>
+                        <div class="text-center py-5 text-muted">Select a date above to view records.</div>
                     </div>
                 </div>
             </div>
@@ -146,10 +141,7 @@
     <div class="modal-dialog modal-lg"><div class="modal-content border-0">
         <div class="modal-header bg-success text-white"><h5>Order Confirmed</h5></div>
         <div class="modal-body p-4" id="summaryList"></div>
-        <div class="modal-footer">
-            <button class="btn btn-outline-success fw-bold" onclick="downloadCSV()">Download CSV</button>
-            <button class="btn btn-secondary" onclick="window.location.reload()">New Order</button>
-        </div>
+        <div class="modal-footer"><button class="btn btn-outline-success fw-bold" onclick="downloadCSV()">Download CSV</button><button class="btn btn-secondary" onclick="window.location.reload()">New Order</button></div>
     </div></div>
 </div>
 
@@ -158,16 +150,9 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let packRateData = [];
     let allOrders = [];
-    window.lastOrderInfo = {};
 
-    function getOrderUnit(category) {
-        return (category && category.toString().includes("Oncidium")) ? "BU" : "Box";
-    }
-
-    function getPackUnit(category) {
-        const cat = category ? category.toString() : "";
-        return (cat.includes("Vanda") || cat.includes("Anthurium")) ? "Stem" : "BU";
-    }
+    function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
+    function getPackUnit(category) { const cat = category ? category.toString() : ""; return (cat.includes("Vanda") || cat.includes("Anthurium")) ? "Stem" : "BU"; }
 
     window.onload = function() {
         fetch(`${GAS_URL}?action=init`).then(res => res.json()).then(data => {
@@ -191,9 +176,7 @@
         document.getElementById('rateResult').classList.add('d-none');
         if(!type) { specSelect.disabled = true; return; }
         specSelect.disabled = false;
-        packRateData.filter(r => r[0] === type).forEach(s => {
-            specSelect.innerHTML += `<option value="${s[2]}">${s[1]}</option>`;
-        });
+        packRateData.filter(r => r[0] === type).forEach(s => { specSelect.innerHTML += `<option value="${s[2]}">${s[1]}</option>`; });
     }
 
     function calculateRate() {
@@ -207,72 +190,38 @@
     function renderCatalogGrid(vars) {
         const grid = document.getElementById('catalogGrid');
         const seenImgs = new Set();
-        const filteredVars = vars.filter(v => {
-            if (seenImgs.has(v[2])) return false;
-            seenImgs.add(v[2]);
-            return true;
-        });
-        grid.innerHTML = filteredVars.map(v => `
-            <div class="col">
-                <div class="item-box shadow-sm">
-                    <div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div>
-                    <div class="box-body">
-                        <div class="box-variety">${v[3] || ''}</div>
-                        <div class="box-item-name">${v[0]}</div>
-                    </div>
-                </div>
-            </div>`).join('');
+        const filteredVars = vars.filter(v => { if (seenImgs.has(v[2])) return false; seenImgs.add(v[2]); return true; });
+        grid.innerHTML = filteredVars.map(v => `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div></div></div></div>`).join('');
     }
 
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
             const unit = getOrderUnit(v[3]);
-            return `
-                <div class="col">
-                    <div class="item-box shadow-sm">
-                        <div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div>
-                        <div class="box-body">
-                            <div class="box-variety">${v[3] || ''}</div>
-                            <div class="box-item-name">${v[0]}</div>
-                        </div>
-                        <div class="order-control">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white fw-bold">Qty</span>
-                                <input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0">
-                                <span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+            return `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div></div><div class="order-control"><div class="input-group input-group-sm"><span class="input-group-text bg-white fw-bold">Qty</span><input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0"><span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span></div></div></div></div>`;
         }).join('');
     }
 
     // --- History Logic ---
     function loadHistory() {
         const historyDiv = document.getElementById('historyContent');
-        historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Syncing Records...</p></div>';
-        
-        fetch(`${GAS_URL}?action=getOrders`)
-        .then(res => res.json())
-        .then(data => {
+        historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching...</p></div>';
+        fetch(`${GAS_URL}?action=getOrders`).then(res => res.json()).then(data => {
             allOrders = data.slice(1);
             const rawDates = [...new Set(allOrders.map(row => row[2]))];
             const sortedDates = rawDates.filter(d => d).sort().reverse();
             const dateSelect = document.getElementById('historyDateSelect');
-            
             if(sortedDates.length === 0) {
-                dateSelect.innerHTML = '<option value="">-- No Orders Found --</option>';
+                dateSelect.innerHTML = '<option value="">-- No Records --</option>';
                 historyDiv.innerHTML = '<div class="text-center py-5">No history yet.</div>';
                 return;
             }
-
             dateSelect.innerHTML = '<option value="">-- Select Shipping Date --</option>';
             sortedDates.forEach(d => {
-                const displayDate = new Date(d).toLocaleDateString('en-CA'); // YYYY-MM-DD
+                const displayDate = new Date(d).toLocaleDateString('en-CA');
                 dateSelect.innerHTML += `<option value="${d}">${displayDate}</option>`;
             });
-            historyDiv.innerHTML = '<div class="text-center py-5 text-muted">Select a date above to view Loc-specific orders.</div>';
+            historyDiv.innerHTML = '<div class="text-center py-5 text-muted">Select a date above.</div>';
         });
     }
 
@@ -283,19 +232,21 @@
 
         const filtered = allOrders.filter(row => row[2] == selectedDate);
         if(filtered.length === 0) {
-            historyDiv.innerHTML = '<div class="text-center py-5">No data for this date.</div>';
+            historyDiv.innerHTML = '<div class="text-center py-5">No data.</div>';
             return;
         }
 
         const locGroups = {};
         filtered.forEach(row => {
+            const ts = new Date(row[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); // 2. 處理 Timestamp
             const loc = row[1], varName = row[3], qtyStr = row[4];
             if(!locGroups[loc]) locGroups[loc] = [];
-            locGroups[loc].push({ name: varName, qty: qtyStr });
+            locGroups[loc].push({ ts: ts, name: varName, qty: qtyStr });
         });
 
-        let html = `<table class="table table-bordered table-history">
-                        <thead><tr><th>Location</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
+        // 3. 表格新增 Time 欄位
+        let html = `<table class="table table-bordered table-history align-middle">
+                        <thead><tr><th>Location</th><th>Time</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
                         <tbody>`;
         
         for(let loc in locGroups) {
@@ -303,9 +254,9 @@
             locGroups[loc].forEach((item, index) => {
                 html += `<tr>`;
                 if(index === 0) {
-                    html += `<td rowspan="${rowCount}" class="align-middle fw-bold"><span class="badge-loc">${loc}</span></td>`;
+                    html += `<td rowspan="${rowCount}" class="fw-bold"><span class="badge-loc">${loc}</span></td>`;
                 }
-                html += `<td>${item.name}</td><td class="text-end fw-bold text-success">${item.qty}</td></tr>`;
+                html += `<td class="ts-cell">${item.ts}</td><td>${item.name}</td><td class="text-end fw-bold text-success">${item.qty}</td></tr>`;
             });
         }
         html += `</tbody></table>`;
@@ -319,14 +270,8 @@
         document.querySelectorAll('.order-qty').forEach(input => {
             if(parseInt(input.value) > 0) items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
         });
-        if(items.length === 0) return alert("Please select at least one item.");
-        
-        const payload = { 
-            location: document.getElementById('inputLocation').value, 
-            shippingDate: document.getElementById('inputDate').value, 
-            items: items 
-        };
-        
+        if(items.length === 0) return alert("Select items.");
+        const payload = { location: document.getElementById('inputLocation').value, shippingDate: document.getElementById('inputDate').value, items: items };
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(res => {
             window.lastOrderInfo = payload;
             let html = `<h6>Market: ${payload.location}</h6><table class="table table-sm">`;
@@ -339,10 +284,8 @@
     function downloadCSV() {
         const info = window.lastOrderInfo;
         let csv = "\uFEFF"; 
-        csv += `Location,${info.location}\nShipping Date,${info.shippingDate}\n\n`;
-        csv += "Variety,Qty,Unit\n";
+        csv += `Location,${info.location}\nShipping Date,${info.shippingDate}\n\nVariety,Qty,Unit\n`;
         info.items.forEach(i => { csv += `"${i.name}",${i.qty},${i.unit}\n`; });
-
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
