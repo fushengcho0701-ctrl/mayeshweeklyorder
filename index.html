@@ -44,7 +44,7 @@
         /* History Table Styles */
         .table-history thead { background-color: var(--fwu-main); color: white; }
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
-        .ts-cell { font-size: 0.75rem; color: #888; white-space: nowrap; }
+        .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
     </style>
 </head>
 <body>
@@ -117,9 +117,10 @@
         </div>
 
         <div class="tab-pane fade" id="historyTab">
-            <div class="card mx-auto" style="max-width: 1100px;">
+            <div class="card mx-auto" style="max-width: 1200px;">
                 <div class="card-body">
-                    <h5 class="card-title">Order Records</h5> <div class="row mb-4">
+                    <h5 class="card-title">Order Records</h5>
+                    <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Select Shipping Date:</label>
                             <select id="historyDateSelect" class="form-select form-select-lg" onchange="filterHistory()">
@@ -205,7 +206,7 @@
     // --- History Logic ---
     function loadHistory() {
         const historyDiv = document.getElementById('historyContent');
-        historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching...</p></div>';
+        historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching records...</p></div>';
         fetch(`${GAS_URL}?action=getOrders`).then(res => res.json()).then(data => {
             allOrders = data.slice(1);
             const rawDates = [...new Set(allOrders.map(row => row[2]))];
@@ -238,15 +239,21 @@
 
         const locGroups = {};
         filtered.forEach(row => {
-            const ts = new Date(row[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); // 2. 處理 Timestamp
+            const dateObj = new Date(row[0]);
+            // Full Date: YYYY-MM-DD HH:MM:SS
+            const ts = dateObj.getFullYear() + '-' + 
+                       String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(dateObj.getDate()).padStart(2, '0') + ' ' + 
+                       dateObj.toTimeString().split(' ')[0];
+            
             const loc = row[1], varName = row[3], qtyStr = row[4];
             if(!locGroups[loc]) locGroups[loc] = [];
             locGroups[loc].push({ ts: ts, name: varName, qty: qtyStr });
         });
 
-        // 3. 表格新增 Time 欄位
+        // 欄位名稱更名為 Submit Time
         let html = `<table class="table table-bordered table-history align-middle">
-                        <thead><tr><th>Location</th><th>Time</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
+                        <thead><tr><th>Location</th><th>Submit Time (Full)</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
                         <tbody>`;
         
         for(let loc in locGroups) {
@@ -256,7 +263,7 @@
                 if(index === 0) {
                     html += `<td rowspan="${rowCount}" class="fw-bold"><span class="badge-loc">${loc}</span></td>`;
                 }
-                html += `<td class="ts-cell">${item.ts}</td><td>${item.name}</td><td class="text-end fw-bold text-success">${item.qty}</td></tr>`;
+                html += `<td class="ts-cell font-monospace">${item.ts}</td><td>${item.name}</td><td class="text-end fw-bold text-success">${item.qty}</td></tr>`;
             });
         }
         html += `</tbody></table>`;
