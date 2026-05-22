@@ -22,14 +22,14 @@
         .tool-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--fwu-main); }
         .result-inline { background: var(--fwu-main); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem; }
 
-        /* Grid Setup */
+        /* Grid Setup (在左側主要區域時維持 RWD) */
         .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
-        @media (max-width: 1200px) { .row-cols-custom-4 > .col { width: 33.33%; } }
-        @media (max-width: 768px) { .row-cols-custom-4 > .col { width: 50%; } }
+        @media (max-width: 1400px) { .row-cols-custom-4 > .col { width: 33.33%; } }
+        @media (max-width: 992px) { .row-cols-custom-4 > .col { width: 50%; } }
         @media (max-width: 576px) { .row-cols-custom-4 > .col { width: 100%; } }
 
         .item-box { border-radius: 12px; overflow: hidden; background: white; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
-        .img-container { width: 100%; height: 350px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
+        .img-container { width: 100%; height: 280px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
         .img-item { width: 100%; height: 100%; object-fit: contain; }
         .box-body { padding: 15px; flex-grow: 1; }
         .box-variety { color: var(--fwu-main); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
@@ -45,6 +45,26 @@
         .table-history thead { background-color: var(--fwu-main); color: white; }
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
         .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
+
+        /* 新增：右側固定即時摘要的樣式 */
+        .sticky-summary-box {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            border: 2px solid var(--fwu-main);
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .summary-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
     </style>
 </head>
 <body>
@@ -87,31 +107,61 @@
 
         <div class="tab-pane fade" id="orderTab">
             <form id="orderForm">
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6"><div class="card h-100"><div class="card-body">
-                        <h5 class="card-title">Location</h5>
-                        <select name="location" id="inputLocation" class="form-select" required>
-                            <option value="">-- Select Market --</option>
-                            <option value="Loc1">Loc1-- LA Market</option>
-                            <option value="Loc3">Loc3-- Orange County</option>
-                            <option value="Loc5">Loc5-- Carlsbad</option>
-                            <option value="Loc6">Loc6-- Riverside</option>
-                            <option value="Loc9">Loc9-- LAX</option>
-                            <option value="Loc10">Loc10-- Phoenix</option>
-                            <option value="Loc12">Loc12-- Oxnard</option>
-                            <option value="Loc19">Loc19-- Portland</option>
-                            <option value="Loc21">Loc21-- Seattle</option>
-                            <option value="Loc25">Loc25-- San Francisco</option>
-                        </select>
-                    </div></div></div>
-                    <div class="col-md-6"><div class="card h-100"><div class="card-body">
-                        <h5 class="card-title">Shipping Date</h5>
-                        <input type="date" name="shippingDate" id="inputDate" class="form-control" required>
-                    </div></div></div>
-                </div>
-                <div id="orderGrid" class="row g-3 row-cols-custom-4 mb-5"></div>
-                <div class="text-center">
-                    <button type="submit" id="submitBtn" class="btn btn-submit px-5 shadow">SUBMIT WEEKLY ORDER</button>
+                <div class="row g-4">
+                    
+                    <div class="col-lg-9">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Location</h5>
+                                        <select name="location" id="inputLocation" class="form-select" required>
+                                            <option value="">-- Select Market --</option>
+                                            <option value="Loc1">Loc1-- LA Market</option>
+                                            <option value="Loc3">Loc3-- Orange County</option>
+                                            <option value="Loc5">Loc5-- Carlsbad</option>
+                                            <option value="Loc6">Loc6-- Riverside</option>
+                                            <option value="Loc9">Loc9-- LAX</option>
+                                            <option value="Loc10">Loc10-- Phoenix</option>
+                                            <option value="Loc12">Loc12-- Oxnard</option>
+                                            <option value="Loc19">Loc19-- Portland</option>
+                                            <option value="Loc21">Loc21-- Seattle</option>
+                                            <option value="Loc25">Loc25-- San Francisco</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Shipping Date</h5>
+                                        <input type="date" name="shippingDate" id="inputDate" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="orderGrid" class="row g-3 row-cols-custom-4 mb-5"></div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <div class="sticky-summary-box p-3">
+                            <h5 class="fw-bold mb-3 pb-2 text-uppercase" style="color: var(--fwu-dark); border-bottom: 2px solid var(--fwu-main);">
+                                Live Summary
+                            </h5>
+                            <div id="liveSummaryContent" class="text-muted small py-3 text-center">
+                                No items selected yet.
+                            </div>
+                            <div id="liveSummaryTotal" class="mt-3 pt-2 fw-bold d-none text-end" style="border-top: 1px solid #ddd;">
+                                Total Items: <span id="summaryTotalCount" class="text-success fs-5">0</span>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" id="submitBtn" class="btn btn-submit w-100 shadow" style="padding: 12px; font-size: 1rem;">
+                                    SUBMIT ORDER
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </form>
         </div>
@@ -195,12 +245,53 @@
         grid.innerHTML = filteredVars.map(v => `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div></div></div></div>`).join('');
     }
 
+    // 渲染下單卡片，並為 input 欄位增加監聽 input 事件，當數值改變時觸發 updateLiveSummary()
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
             const unit = getOrderUnit(v[3]);
-            return `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div></div><div class="order-control"><div class="input-group input-group-sm"><span class="input-group-text bg-white fw-bold">Qty</span><input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0"><span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span></div></div></div></div>`;
+            return `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div></div><div class="order-control"><div class="input-group input-group-sm"><span class="input-group-text bg-white fw-bold">Qty</span><input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0" oninput="updateLiveSummary()"><span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span></div></div></div></div>`;
         }).join('');
+    }
+
+    // 新增：動態重算當前右側已填寫的品項統計
+    function updateLiveSummary() {
+        const summaryContent = document.getElementById('liveSummaryContent');
+        const summaryTotal = document.getElementById('liveSummaryTotal');
+        const totalCountSpan = document.getElementById('summaryTotalCount');
+        
+        let selectedItems = [];
+        let totalItemsCount = 0;
+
+        document.querySelectorAll('.order-qty').forEach(input => {
+            const val = parseInt(input.value);
+            if(val > 0) {
+                selectedItems.push({ name: input.dataset.name, qty: val, unit: input.dataset.unit });
+                totalItemsCount += val;
+            }
+        });
+
+        if(selectedItems.length === 0) {
+            summaryContent.innerHTML = 'No items selected yet.';
+            summaryContent.classList.add('text-muted', 'text-center');
+            summaryTotal.classList.add('d-none');
+            return;
+        }
+
+        // 構造右側清單 HTML
+        summaryContent.classList.remove('text-muted', 'text-center');
+        let html = '<div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">';
+        selectedItems.forEach(item => {
+            html += `<div class="summary-item-row">
+                        <span class="fw-semibold text-truncate me-2" style="max-width: 150px;" title="${item.name}">${item.name}</span>
+                        <span class="badge bg-light text-dark fw-bold border">${item.qty} ${item.unit}</span>
+                     </div>`;
+        });
+        html += '</div>';
+        
+        summaryContent.innerHTML = html;
+        totalCountSpan.innerText = totalItemsCount;
+        summaryTotal.classList.remove('d-none');
     }
 
     // --- History Logic ---
@@ -240,7 +331,6 @@
         const locGroups = {};
         filtered.forEach(row => {
             const dateObj = new Date(row[0]);
-            // Full Date: YYYY-MM-DD HH:MM:SS
             const ts = dateObj.getFullYear() + '-' + 
                        String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
                        String(dateObj.getDate()).padStart(2, '0') + ' ' + 
@@ -251,7 +341,6 @@
             locGroups[loc].push({ ts: ts, name: varName, qty: qtyStr });
         });
 
-        // 欄位名稱更名為 Submit Time
         let html = `<table class="table table-bordered table-history align-middle">
                         <thead><tr><th>Location</th><th>Submit Time (Full)</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
                         <tbody>`;
