@@ -6,8 +6,8 @@
     <title>[FWU] Mayesh Weekly Order System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --fwu-main: #95c51b; --fwu-dark: #7aa314; }
-        body { background-color: #f4f7f6; color: #333; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        :root { --fwu-main: #95c51b; --fwu-dark: #7aa314; --fwu-light: #f4f7f6; }
+        body { background-color: var(--fwu-light); color: #333; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
         
         /* Header & Nav */
         .header-section { background: white; padding: 30px 0 10px 0; border-bottom: 5px solid var(--fwu-main); text-align: center; margin-bottom: 20px; }
@@ -22,12 +22,13 @@
         .tool-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--fwu-main); }
         .result-inline { background: var(--fwu-main); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem; }
 
-        /* Grid Setup (在左側主要區域時維持 RWD) */
+        /* Grid Setup (用於 PLACE ORDER 頁面卡片維持 RWD) */
         .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
         @media (max-width: 1400px) { .row-cols-custom-4 > .col { width: 33.33%; } }
         @media (max-width: 992px) { .row-cols-custom-4 > .col { width: 50%; } }
         @media (max-width: 576px) { .row-cols-custom-4 > .col { width: 100%; } }
 
+        /* Place Order 卡片樣式 */
         .item-box { border-radius: 12px; overflow: hidden; background: white; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
         .img-container { width: 100%; height: 280px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
         .img-item { width: 100%; height: 100%; object-fit: contain; }
@@ -35,7 +36,7 @@
         .box-variety { color: var(--fwu-main); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
         .box-item-name { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-top: 5px; margin-bottom: 2px; }
         
-        /* 新增：品種介紹說明的文字樣式 */
+        /* 品種介紹說明的文字樣式 */
         .box-intro { font-size: 0.85rem; color: #666; font-style: italic; margin-top: 3px; line-height: 1.3; }
         
         .order-control { padding: 10px 15px; border-top: 1px solid #eee; background: #fafafa; }
@@ -44,8 +45,16 @@
 
         .btn-submit { background-color: var(--fwu-main); border: none; padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
 
-        /* History Table Styles */
-        .table-history thead { background-color: var(--fwu-main); color: white; }
+        /* Price List & History Table UI/UX 優化樣式 */
+        .table-price-list, .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
+        .table-price-list thead, .table-history thead { background-color: var(--fwu-main); color: white; }
+        .table-price-list th, .table-history th { font-weight: 700; border: none; padding: 14px; }
+        .table-price-list td, .table-history td { padding: 12px 14px; border-color: #f1f1f1; vertical-align: middle; }
+        
+        /* 表格內部分類群組隔行樣式 */
+        .category-row-header { background-color: #f8f9fa !important; font-weight: 800; color: var(--fwu-dark); letter-spacing: 1px; font-size: 0.9rem; }
+        .catalog-item-title { font-size: 1.05rem; font-weight: 700; color: #222; }
+
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
         .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
 
@@ -75,7 +84,7 @@
 <div class="header-section shadow-sm">
     <h1 class="header-title text-uppercase">[FWU] Mayesh Weekly Order</h1>
     <ul class="nav nav-pills justify-content-center mb-3" id="mainTab" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#catalogTab">1. CATALOG</button></li>
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#catalogTab">1. PRICE LIST</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#orderTab">2. PLACE ORDER</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#historyTab" onclick="loadHistory()">3. ORDER HISTORY</button></li>
     </ul>
@@ -89,13 +98,13 @@
                 <div class="card-body tool-box">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">1. Category</label>
-                            <select id="toolVariety" class="form-select" onchange="updateSpecOptions()">
-                                <option value="">-- Choose Category --</option>
+                            <label class="form-label small fw-bold">1. Filter Category</label>
+                            <select id="toolVariety" class="form-select" onchange="onCategorySelectChange()">
+                                <option value="">-- All Categories --</option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">2. Specification</label>
+                            <label class="form-label small fw-bold">2. Packing Specification Check</label>
                             <select id="toolSpec" class="form-select" disabled onchange="calculateRate()">
                                 <option value="">-- Select Spec --</option>
                             </select>
@@ -104,8 +113,28 @@
                     </div>
                 </div>
             </div>
-            <h5 class="card-title">Product Catalog</h5>
-            <div id="catalogGrid" class="row g-3 row-cols-custom-4"></div>
+
+            <div class="card mx-auto shadow-sm" style="max-width: 1100px;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle table-price-list mb-0" id="priceListTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Category</th>
+                                    <th style="width: 75%;">Product Details (Variety & Introduction)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="priceListBody">
+                                <tr>
+                                    <td colspan="2" class="text-center py-5 text-muted">
+                                        <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Price List...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="tab-pane fade" id="orderTab">
@@ -204,6 +233,7 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let packRateData = [];
     let allOrders = [];
+    let initialVarietiesData = []; // 儲存原始品種完整快取資料
 
     function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
     function getPackUnit(category) { const cat = category ? category.toString() : ""; return (cat.includes("Vanda") || cat.includes("Anthurium")) ? "Stem" : "BU"; }
@@ -211,8 +241,9 @@
     window.onload = function() {
         fetch(`${GAS_URL}?action=init`).then(res => res.json()).then(data => {
             packRateData = data.packRate;
+            initialVarietiesData = data.varieties;
             initTool(data.packRate);
-            renderCatalogGrid(data.varieties);
+            renderPriceListTable(data.varieties); // 呼叫全新優化的文字報價單渲染函式
             renderOrderGrid(data.varieties);
         });
     };
@@ -220,7 +251,20 @@
     function initTool(rates) {
         const select = document.getElementById('toolVariety');
         const types = [...new Set(rates.slice(1).map(r => r[0]))];
+        select.innerHTML = '<option value="">-- All Categories --</option>'; // 表格快篩優化
         types.forEach(t => { if(t) select.innerHTML += `<option value="${t}">${t}</option>`; });
+    }
+
+    // 當頂部 Category 選單變更時，同時篩選下方文字報價單與更新規格
+    function onCategorySelectChange() {
+        updateSpecOptions();
+        const selectedCategory = document.getElementById('toolVariety').value;
+        if (!selectedCategory) {
+            renderPriceListTable(initialVarietiesData);
+        } else {
+            const filtered = initialVarietiesData.filter(v => (v[3] || '').trim().toUpperCase() === selectedCategory.trim().toUpperCase());
+            renderPriceListTable(filtered);
+        }
     }
 
     function updateSpecOptions() {
@@ -241,15 +285,53 @@
         document.getElementById('rateResult').classList.remove('d-none');
     }
 
-    // 在 Catalog 頁面也同步加上 Intro 備註
-    function renderCatalogGrid(vars) {
-        const grid = document.getElementById('catalogGrid');
-        const seenImgs = new Set();
-        const filteredVars = vars.filter(v => { if (seenImgs.has(v[2])) return false; seenImgs.add(v[2]); return true; });
-        grid.innerHTML = filteredVars.map(v => `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div><div class="box-intro">${v[1] || ''}</div></div></div></div>`).join('');
+    /* 全新優化功能：動態生成 UI/UX 文字報價單 (Price List) 表格，不含任何圖片 */
+    function renderPriceListTable(vars) {
+        const tbody = document.getElementById('priceListBody');
+        if(!vars || vars.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4 text-muted">No items matched the criteria.</td></tr>';
+            return;
+        }
+
+        // 依據 Category (v[3]) 進行排序，確保資料群組化的整齊性
+        const sortedVars = [...vars].sort((a, b) => (a[3] || '').localeCompare(b[3] || ''));
+        
+        let currentCategory = "";
+        let htmlRows = "";
+
+        sortedVars.forEach(v => {
+            const categoryName = (v[3] || 'UNGROUPED').toUpperCase();
+            const itemName = v[0] || '';
+            const itemIntro = v[1] || '';
+
+            // 當遇到新的分類時，自動插入一行美觀的 Category 分類隔行橫條
+            if (categoryName !== currentCategory) {
+                currentCategory = categoryName;
+                htmlRows += `
+                    <tr class="category-row-header">
+                        <td colspan="2" class="text-uppercase fw-bold py-2 px-3 text-success" style="background-color: #f1f8e9;">
+                            ➔ ${currentCategory}
+                        </td>
+                    </tr>
+                `;
+            }
+
+            // 渲染純文字明細行，進行字型粗細對比優化
+            htmlRows += `
+                <tr>
+                    <td class="text-muted small fw-semibold text-uppercase ps-4">${categoryName}</td>
+                    <td>
+                        <div class="catalog-item-title">${itemName}</div>
+                        ${itemIntro ? `<div class="box-intro text-secondary small">${itemIntro}</div>` : ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = htmlRows;
     }
 
-    // 在 Place Order 下單卡片區域：在名稱（v[0]）下方加入灰色斜體小字的 Intro（v[1]）
+    // 在 Place Order 下單區域：維持原本卡片與 Intro斜體字
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
