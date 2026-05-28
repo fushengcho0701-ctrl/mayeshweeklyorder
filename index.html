@@ -48,12 +48,13 @@
         /* Price List & History Table UI/UX 優化樣式 */
         .table-price-list, .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
         .table-price-list thead, .table-history thead { background-color: var(--fwu-main); color: white; }
-        .table-price-list th, .table-history th { font-weight: 700; border: none; padding: 14px; }
+        .table-price-list th, .table-history th { font-weight: 700; border: none; padding: 14px; vertical-align: middle; }
         .table-price-list td, .table-history td { padding: 12px 14px; border-color: #f1f1f1; vertical-align: middle; }
         
         /* 表格內部分類群組隔行樣式 */
         .category-row-header { background-color: #f8f9fa !important; font-weight: 800; color: var(--fwu-dark); letter-spacing: 1px; font-size: 0.9rem; }
         .catalog-item-title { font-size: 1.05rem; font-weight: 700; color: #222; }
+        .scientific-name-style { font-style: italic; color: #555; font-size: 0.95rem; }
 
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
         .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
@@ -94,7 +95,7 @@
     <div class="tab-content">
         
         <div class="tab-pane fade show active" id="catalogTab">
-            <div class="card mb-4 mx-auto" style="max-width: 1100px;">
+            <div class="card mb-4 mx-auto" style="max-width: 1200px;">
                 <div class="card-body tool-box">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-4">
@@ -114,19 +115,23 @@
                 </div>
             </div>
 
-            <div class="card mx-auto shadow-sm" style="max-width: 1100px;">
+            <div class="card mx-auto shadow-sm" style="max-width: 1200px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle table-price-list mb-0" id="priceListTable">
                             <thead>
                                 <tr>
-                                    <th style="width: 25%;">Category</th>
-                                    <th style="width: 75%;">Product Details (Variety & Introduction)</th>
+                                    <th style="width: 25%;">Variety Name</th>
+                                    <th style="width: 20%;">Scientific Name</th>
+                                    <th style="width: 15%;" class="text-center">Color</th>
+                                    <th style="width: 13%;" class="text-center">Stem</th>
+                                    <th style="width: 13%;" class="text-center">Length</th>
+                                    <th style="width: 14%;" class="text-end pe-4">FOB_USD</th>
                                 </tr>
                             </thead>
                             <tbody id="priceListBody">
                                 <tr>
-                                    <td colspan="2" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Price List...
                                     </td>
                                 </tr>
@@ -233,17 +238,19 @@
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let packRateData = [];
     let allOrders = [];
-    let initialVarietiesData = []; // 儲存原始品種完整快取資料
+    let initialVarietiesData = [];
 
     function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
     function getPackUnit(category) { const cat = category ? category.toString() : ""; return (cat.includes("Vanda") || cat.includes("Anthurium")) ? "Stem" : "BU"; }
 
     window.onload = function() {
+        // 請確保您的 Google Apps Script 在後端回傳這 6 個欄位的陣列資料
+        // 預期後端 JSON format 範例： v[0]=Variety Name, v[1]=Intro, v[2]=img_url, v[3]=Category, v[4]=Scientific Name, v[5]=Color, v[6]=Stem, v[7]=Length, v[8]=FOB_USD
         fetch(`${GAS_URL}?action=init`).then(res => res.json()).then(data => {
             packRateData = data.packRate;
             initialVarietiesData = data.varieties;
             initTool(data.packRate);
-            renderPriceListTable(data.varieties); // 呼叫全新優化的文字報價單渲染函式
+            renderPriceListTable(data.varieties);
             renderOrderGrid(data.varieties);
         });
     };
@@ -251,11 +258,10 @@
     function initTool(rates) {
         const select = document.getElementById('toolVariety');
         const types = [...new Set(rates.slice(1).map(r => r[0]))];
-        select.innerHTML = '<option value="">-- All Categories --</option>'; // 表格快篩優化
+        select.innerHTML = '<option value="">-- All Categories --</option>';
         types.forEach(t => { if(t) select.innerHTML += `<option value="${t}">${t}</option>`; });
     }
 
-    // 當頂部 Category 選單變更時，同時篩選下方文字報價單與更新規格
     function onCategorySelectChange() {
         updateSpecOptions();
         const selectedCategory = document.getElementById('toolVariety').value;
@@ -285,45 +291,61 @@
         document.getElementById('rateResult').classList.remove('d-none');
     }
 
-    /* 全新優化功能：動態生成 UI/UX 文字報價單 (Price List) 表格，不含任何圖片 */
+    /* 渲染全新多欄位 Price List 表格（對應新增的 Tab 欄位規格） */
     function renderPriceListTable(vars) {
         const tbody = document.getElementById('priceListBody');
         if(!vars || vars.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4 text-muted">No items matched the criteria.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No items matched the criteria.</td></tr>';
             return;
         }
 
-        // 依據 Category (v[3]) 進行排序，確保資料群組化的整齊性
+        // 依據 Category (v[3]) 分類排序
         const sortedVars = [...vars].sort((a, b) => (a[3] || '').localeCompare(b[3] || ''));
         
         let currentCategory = "";
         let htmlRows = "";
 
         sortedVars.forEach(v => {
-            const categoryName = (v[3] || 'UNGROUPED').toUpperCase();
-            const itemName = v[0] || '';
-            const itemIntro = v[1] || '';
+            const categoryName   = (v[3] || 'UNGROUPED').toUpperCase();
+            const varietyName    = v[0] || '-';
+            const itemIntro      = v[1] || '';
+            // 請依照您 Google Sheet 實際回傳的 index 順序調整對應（以下為普遍推薦排序預設）
+            const scientificName = v[4] || '-';
+            const color          = v[5] || '-';
+            const stem           = v[6] || '-';
+            const length         = v[7] || '-';
+            const fobPrice       = v[8] || '-';
 
-            // 當遇到新的分類時，自動插入一行美觀的 Category 分類隔行橫條
+            // 動態分類群組橫條
             if (categoryName !== currentCategory) {
                 currentCategory = categoryName;
                 htmlRows += `
                     <tr class="category-row-header">
-                        <td colspan="2" class="text-uppercase fw-bold py-2 px-3 text-success" style="background-color: #f1f8e9;">
+                        <td colspan="6" class="text-uppercase fw-bold py-2 px-3 text-success" style="background-color: #f1f8e9;">
                             ➔ ${currentCategory}
                         </td>
                     </tr>
                 `;
             }
 
-            // 渲染純文字明細行，進行字型粗細對比優化
+            // 格式化價格顯示
+            let displayPrice = fobPrice;
+            if(fobPrice !== '-' && !isNaN(fobPrice) && fobPrice !== '') {
+                displayPrice = '$' + parseFloat(fobPrice).toFixed(2);
+            }
+
+            // 產生 6 欄位的資料列
             htmlRows += `
                 <tr>
-                    <td class="text-muted small fw-semibold text-uppercase ps-4">${categoryName}</td>
                     <td>
-                        <div class="catalog-item-title">${itemName}</div>
+                        <div class="catalog-item-title">${varietyName}</div>
                         ${itemIntro ? `<div class="box-intro text-secondary small">${itemIntro}</div>` : ''}
                     </td>
+                    <td class="scientific-name-style">${scientificName}</td>
+                    <td class="text-center text-muted">${color}</td>
+                    <td class="text-center fw-semibold">${stem}</td>
+                    <td class="text-center">${length}</td>
+                    <td class="text-end fw-bold text-success pe-4">${displayPrice}</td>
                 </tr>
             `;
         });
@@ -331,7 +353,7 @@
         tbody.innerHTML = htmlRows;
     }
 
-    // 在 Place Order 下單區域：維持原本卡片與 Intro斜體字
+    // 在 Place Order 下單區域
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
@@ -340,7 +362,6 @@
         }).join('');
     }
 
-    // 動態重算當前右側已填寫的品項統計
     function updateLiveSummary() {
         const summaryContent = document.getElementById('liveSummaryContent');
         const summaryTotal = document.getElementById('liveSummaryTotal');
