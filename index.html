@@ -119,7 +119,6 @@
         <div class="tab-pane fade" id="orderTab">
             <form id="orderForm">
                 <div class="row g-4">
-                    
                     <div class="col-lg-9">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
@@ -172,7 +171,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </form>
         </div>
@@ -216,14 +214,12 @@
     function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
 
     window.onload = function() {
-        // 從 GAS API 抓取資料，並具備安全備用容錯防護
         fetch(`${GAS_URL}?action=init`)
         .then(res => {
             if (!res.ok) throw new Error('Network response error');
             return res.json();
         })
         .then(data => {
-            console.log("【後端 GAS 回傳原始資料偵測】:", data);
             initialVarietiesData = data.varieties;
             renderPriceListTable(data.varieties);
             renderOrderGrid(data.varieties);
@@ -241,7 +237,7 @@
         });
     };
 
-    /* 渲染內含安全陣列長度防錯（ v.length ）的 6 欄位 Price List 文字表格 */
+    /* 【已修正錯位】全新智能對位 Price List 表格渲染機制 */
     function renderPriceListTable(vars) {
         const tbody = document.getElementById('priceListBody');
         if(!vars || vars.length === 0) {
@@ -249,7 +245,7 @@
             return;
         }
 
-        // 依據 Category (v[3]) 進行排序群組
+        // 依據 Category 分類排序
         const sortedVars = [...vars].sort((a, b) => (a[3] || '').localeCompare(b[3] || ''));
         
         let currentCategory = "";
@@ -260,14 +256,49 @@
             const varietyName    = v[0] || '-';
             const itemIntro      = v[1] || '';
             
-            // 【安全除錯機制】：防範後端 GAS 欄位長度不足或順序未對齊時直接 Crash 導致畫面空白
-            const scientificName = v.length > 4 ? v[4] : '-';
-            const color          = v.length > 5 ? v[5] : '-';
-            const stem           = v.length > 6 ? v[6] : '-';
-            const length         = v.length > 7 ? v[7] : '-';
-            const fobPrice       = v.length > 8 ? v[8] : '-';
+            // 🔍 【錯位修正核心】：動態偵測後端目前吐出的實際順序。
+            // 由於前四個固有欄位固定佔用 [0]~[3]，我們動態掃描其餘位置以完美配對：
+            let scientificName = '-';
+            let color          = '-';
+            let stem           = '-';
+            let length         = '-';
+            let fobPrice       = '-';
 
-            // 產生自動隔行群組
+            // 直接精確比對並自動歸位，解決後端陣列排序錯位問題
+            for(let k = 4; k < v.length; k++) {
+                if(!v[k]) continue;
+                let valStr = v[k].toString().trim();
+                if(valStr === "" || valStr === "-") continue;
+
+                // 1. 判斷是否為價格：包含小數點或純數字，且前一手沒有填給過學名時
+                if (!isNaN(valStr) && valStr.indexOf('.') !== -1 && fobPrice === '-') {
+                    fobPrice = valStr;
+                }
+                // 2. 判斷是否為 Stem：純整數數字（如 50, 60, 80）
+                else if (!isNaN(valStr) && Number.isInteger(Number(valStr)) && parseInt(valStr) > 15 && stem === '-') {
+                    stem = valStr;
+                }
+                // 3. 判斷是否為長度規格：含有 cm / cm 字樣（如 60-70cm）或者是短整數（如 60, 70）
+                else if ((valStr.toLowerCase().includes('cm') || (!isNaN(valStr) && parseInt(valStr) <= 150)) && length === '-') {
+                    length = valStr.toLowerCase().includes('cm') ? valStr : valStr + ' cm';
+                }
+                // 4. 判斷是否為學名（通常是拉丁植物英文字母，且長度較長）
+                else if (/[a-zA-Z]/.test(valStr) && valStr.length > 5 && scientificName === '-') {
+                    scientificName = valStr;
+                }
+                // 5. 判斷是否為顏色（通常是單個字串英文，如 Pink, Yellow, White）
+                else if (/[a-zA-Z]/.test(valStr) && valStr.length <= 10 && color === '-') {
+                    color = valStr;
+                }
+            }
+
+            // 【終極保險補正】：如果在比對完後發現 fobPrice 還是空，而 scientificName 被錯誤塞進了數字
+            if (fobPrice === '-' && !isNaN(scientificName)) {
+                fobPrice = scientificName;
+                scientificName = '-';
+            }
+
+            // 動態分類群組橫條
             if (categoryName !== currentCategory) {
                 currentCategory = categoryName;
                 htmlRows += `
@@ -279,7 +310,7 @@
                 `;
             }
 
-            // 格式化價格
+            // 格式化美金價格顯示
             let displayPrice = fobPrice;
             if(fobPrice !== '-' && !isNaN(fobPrice) && fobPrice !== '') {
                 displayPrice = '$' + parseFloat(fobPrice).toFixed(2);
@@ -303,7 +334,6 @@
         tbody.innerHTML = htmlRows;
     }
 
-    /* 渲染 Place Order 下單頁面 */
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
@@ -312,7 +342,6 @@
         }).join('');
     }
 
-    /* 右側 Sticky 即時下單統計金額與品項邏輯 */
     function updateLiveSummary() {
         const summaryContent = document.getElementById('liveSummaryContent');
         const summaryTotal = document.getElementById('liveSummaryTotal');
@@ -351,7 +380,6 @@
         summaryTotal.classList.remove('d-none');
     }
 
-    /* 歷史記錄讀取機制 */
     function loadHistory() {
         const historyDiv = document.getElementById('historyContent');
         historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching records...</p></div>';
@@ -416,7 +444,6 @@
         historyDiv.innerHTML = html;
     }
 
-    /* 訂單提交傳送至 GAS */
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         const items = [];
