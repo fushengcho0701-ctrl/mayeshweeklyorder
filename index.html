@@ -119,6 +119,7 @@
         <div class="tab-pane fade" id="orderTab">
             <form id="orderForm">
                 <div class="row g-4">
+                    
                     <div class="col-lg-9">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
@@ -171,6 +172,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </form>
         </div>
@@ -214,13 +216,14 @@
     function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
 
     window.onload = function() {
-        // 嘗試抓取資料，若因安全連線阻擋則跳出警告提示
+        // 從 GAS API 抓取資料，並具備安全備用容錯防護
         fetch(`${GAS_URL}?action=init`)
         .then(res => {
             if (!res.ok) throw new Error('Network response error');
             return res.json();
         })
         .then(data => {
+            console.log("【後端 GAS 回傳原始資料偵測】:", data);
             initialVarietiesData = data.varieties;
             renderPriceListTable(data.varieties);
             renderOrderGrid(data.varieties);
@@ -230,15 +233,15 @@
             document.getElementById('priceListBody').innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center py-5 text-danger fw-bold">
-                        ⚠️ 找不到資料！請檢查網址列左側是否顯示「不安全 (http)」。<br>
-                        請改使用安全連線 <a href="https://mayeshorder.fwusheng.com" class="text-decoration-underline text-danger">https://mayeshorder.fwusheng.com</a> 開啟網頁。
+                        ⚠️ 無法讀取報價單資料！請確認網址開頭是否為安全加密連線。<br>
+                        請嘗試點擊此處切換至：<a href="https://mayeshorder.fwusheng.com" class="text-decoration-underline text-danger">https://mayeshorder.fwusheng.com</a>
                     </td>
                 </tr>
             `;
         });
     };
 
-    /* 渲染 6 欄位 Price List 表格 */
+    /* 渲染內含安全陣列長度防錯（ v.length ）的 6 欄位 Price List 文字表格 */
     function renderPriceListTable(vars) {
         const tbody = document.getElementById('priceListBody');
         if(!vars || vars.length === 0) {
@@ -246,7 +249,7 @@
             return;
         }
 
-        // 依據 Category (v[3]) 分類排序
+        // 依據 Category (v[3]) 進行排序群組
         const sortedVars = [...vars].sort((a, b) => (a[3] || '').localeCompare(b[3] || ''));
         
         let currentCategory = "";
@@ -256,13 +259,15 @@
             const categoryName   = (v[3] || 'UNGROUPED').toUpperCase();
             const varietyName    = v[0] || '-';
             const itemIntro      = v[1] || '';
-            const scientificName = v[4] || '-';
-            const color          = v[5] || '-';
-            const stem           = v[6] || '-';
-            const length         = v[7] || '-';
-            const fobPrice       = v[8] || '-';
+            
+            // 【安全除錯機制】：防範後端 GAS 欄位長度不足或順序未對齊時直接 Crash 導致畫面空白
+            const scientificName = v.length > 4 ? v[4] : '-';
+            const color          = v.length > 5 ? v[5] : '-';
+            const stem           = v.length > 6 ? v[6] : '-';
+            const length         = v.length > 7 ? v[7] : '-';
+            const fobPrice       = v.length > 8 ? v[8] : '-';
 
-            // 動態分類群組橫條
+            // 產生自動隔行群組
             if (categoryName !== currentCategory) {
                 currentCategory = categoryName;
                 htmlRows += `
@@ -274,7 +279,7 @@
                 `;
             }
 
-            // 格式化價格顯示
+            // 格式化價格
             let displayPrice = fobPrice;
             if(fobPrice !== '-' && !isNaN(fobPrice) && fobPrice !== '') {
                 displayPrice = '$' + parseFloat(fobPrice).toFixed(2);
@@ -298,6 +303,7 @@
         tbody.innerHTML = htmlRows;
     }
 
+    /* 渲染 Place Order 下單頁面 */
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
@@ -306,6 +312,7 @@
         }).join('');
     }
 
+    /* 右側 Sticky 即時下單統計金額與品項邏輯 */
     function updateLiveSummary() {
         const summaryContent = document.getElementById('liveSummaryContent');
         const summaryTotal = document.getElementById('liveSummaryTotal');
@@ -344,6 +351,7 @@
         summaryTotal.classList.remove('d-none');
     }
 
+    /* 歷史記錄讀取機制 */
     function loadHistory() {
         const historyDiv = document.getElementById('historyContent');
         historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching records...</p></div>';
@@ -408,6 +416,7 @@
         historyDiv.innerHTML = html;
     }
 
+    /* 訂單提交傳送至 GAS */
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         const items = [];
