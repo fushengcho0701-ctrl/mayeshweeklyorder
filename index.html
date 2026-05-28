@@ -18,37 +18,32 @@
         .card-title { color: var(--fwu-main); font-weight: 700; border-left: 5px solid var(--fwu-main); padding-left: 12px; margin-bottom: 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
-        /* Grid Setup (用於 PLACE ORDER 頁面卡片維持 RWD) */
-        .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
-        @media (max-width: 1400px) { .row-cols-custom-4 > .col { width: 33.33%; } }
-        @media (max-width: 992px) { .row-cols-custom-4 > .col { width: 50%; } }
-        @media (max-width: 576px) { .row-cols-custom-4 > .col { width: 100%; } }
+        /* Place Order 俐落無圖文字卡片排版 */
+        .row-cols-custom-3 > .col { flex: 0 0 auto; width: 33.333%; }
+        @media (max-width: 1200px) { .row-cols-custom-3 > .col { width: 50%; } }
+        @media (max-width: 768px) { .row-cols-custom-3 > .col { width: 100%; } }
 
-        /* Place Order 卡片樣式 */
-        .item-box { border-radius: 12px; overflow: hidden; background: white; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
-        .img-container { width: 100%; height: 280px; background: #fff; overflow: hidden; border-bottom: 1px solid #f0f0f0; }
-        .img-item { width: 100%; height: 100%; object-fit: contain; }
-        .box-body { padding: 15px; flex-grow: 1; }
-        .box-variety { color: var(--fwu-main); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-        .box-item-name { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-top: 5px; margin-bottom: 2px; }
-        .box-intro { font-size: 0.85rem; color: #666; font-style: italic; margin-top: 3px; line-height: 1.3; }
-        
-        .order-control { padding: 10px 15px; border-top: 1px solid #eee; background: #fafafa; }
-        .unit-label { background: #f8f9fa; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.5rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 800; min-width: 60px; text-align: center; font-size: 0.85rem; }
+        .item-text-box { border-radius: 10px; background: white; border: 1px solid #e2e8f0; padding: 15px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+        .item-text-box:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-color: var(--fwu-main); }
+        .order-variety-title { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; }
+        .order-scientific { font-style: italic; color: #666; font-size: 0.85rem; }
+        .order-spec-meta { font-size: 0.85rem; color: #718096; background: #edf2f7; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+
+        .order-control { margin-top: 12px; padding-top: 10px; border-top: 1px solid #edf2f7; }
+        .unit-label { background: #f8f9fa; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.5rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 800; min-width: 50px; text-align: center; font-size: 0.85rem; }
         .unit-bu { color: white; background: var(--fwu-main); border-color: var(--fwu-main); }
 
-        .btn-submit { background-color: var(--fwu-main); border: none; padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
+        .btn-submit { background-color: var(--fwu-main); border: none; padding: 15px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
 
         /* Price List & History Table 樣式 */
         .table-price-list, .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
         .table-price-list thead, .table-history thead { background-color: var(--fwu-main); color: white; }
         .table-price-list th, .table-history th { font-weight: 700; border: none; padding: 14px; vertical-align: middle; }
-        .table-price-list td, .table-history td { padding: 12px 14px; border-color: #f1f1f1; vertical-align: middle; }
+        .table-price-list td, .table-history td { padding: 14px; border-color: #f1f1f1; vertical-align: middle; }
         
-        /* 表格內部分類群組隔行樣式 */
-        .category-row-header { background-color: #f8f9fa !important; font-weight: 800; color: var(--fwu-dark); letter-spacing: 1px; font-size: 0.9rem; }
         .catalog-item-title { font-size: 1.05rem; font-weight: 700; color: #222; }
-        .scientific-name-style { font-style: italic; color: #555; font-size: 0.95rem; }
+        .scientific-name-style { font-style: italic; color: #4a5568; font-size: 0.95rem; }
+        .memo-text-style { font-size: 0.85rem; color: #718096; font-style: italic; }
 
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
         .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
@@ -89,7 +84,7 @@
     <div class="tab-content">
         
         <div class="tab-pane fade show active" id="catalogTab">
-            <div class="card mx-auto shadow-sm" style="max-width: 1200px;">
+            <div class="card mx-auto shadow-sm" style="max-width: 1250px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle table-price-list mb-0" id="priceListTable">
@@ -97,16 +92,16 @@
                                 <tr>
                                     <th style="width: 25%;">Variety Name</th>
                                     <th style="width: 20%;">Scientific Name</th>
-                                    <th style="width: 15%;" class="text-center">Color</th>
-                                    <th style="width: 13%;" class="text-center">Stem</th>
-                                    <th style="width: 13%;" class="text-center">Length</th>
-                                    <th style="width: 14%;" class="text-end pe-4">FOB_USD</th>
+                                    <th style="width: 12%;" class="text-center">Color</th>
+                                    <th style="width: 13%;" class="text-center">Stem Length</th>
+                                    <th style="width: 12%;" class="text-end">FOB_USD</th>
+                                    <th style="width: 18%;" class="ps-4">Memo</th>
                                 </tr>
                             </thead>
                             <tbody id="priceListBody">
                                 <tr>
                                     <td colspan="6" class="text-center py-5 text-muted">
-                                        <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Price List from Google Sheet...
+                                        <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Latest Price List...
                                     </td>
                                 </tr>
                             </tbody>
@@ -119,6 +114,7 @@
         <div class="tab-pane fade" id="orderTab">
             <form id="orderForm">
                 <div class="row g-4">
+                    
                     <div class="col-lg-9">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
@@ -150,7 +146,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="orderGrid" class="row g-3 row-cols-custom-4 mb-5"></div>
+                        <div id="orderGrid" class="row g-3 row-cols-custom-3 mb-5"></div>
                     </div>
 
                     <div class="col-lg-3">
@@ -171,6 +167,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </form>
         </div>
@@ -209,9 +206,11 @@
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
     let allOrders = [];
-    let initialVarietiesData = [];
 
-    function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
+    // 如果是文心蘭(Oncidium)單位自動切換成把(BU)，其餘花卉則為箱(Box)
+    function getOrderUnit(name) { 
+        return (name && name.toString().toLowerCase().includes("oncidium")) ? "BU" : "Box"; 
+    }
 
     window.onload = function() {
         fetch(`${GAS_URL}?action=init`)
@@ -220,7 +219,6 @@
             return res.json();
         })
         .then(data => {
-            initialVarietiesData = data.varieties;
             renderPriceListTable(data.varieties);
             renderOrderGrid(data.varieties);
         })
@@ -229,88 +227,33 @@
             document.getElementById('priceListBody').innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center py-5 text-danger fw-bold">
-                        ⚠️ 無法讀取報價單資料！請確認網址開頭是否為安全加密連線。<br>
-                        請嘗試點擊此處切換至：<a href="https://mayeshorder.fwusheng.com" class="text-decoration-underline text-danger">https://mayeshorder.fwusheng.com</a>
+                        ⚠️ 無法讀取報價單資料！請確認網址開頭是否為 https 加密連線。<br>
+                        請重新確認網域 SSL：<a href="https://mayeshorder.fwusheng.com" class="text-decoration-underline text-danger">https://mayeshorder.fwusheng.com</a>
                     </td>
                 </tr>
             `;
         });
     };
 
-    /* 【已修正錯位】全新智能對位 Price List 表格渲染機制 */
+    /* 100% 精準對位：A欄至F欄文字報價單表格渲染機制 */
     function renderPriceListTable(vars) {
         const tbody = document.getElementById('priceListBody');
         if(!vars || vars.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No items found in Price List.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Price List 為空或找不到資料。</td></tr>';
             return;
         }
 
-        // 依據 Category 分類排序
-        const sortedVars = [...vars].sort((a, b) => (a[3] || '').localeCompare(b[3] || ''));
-        
-        let currentCategory = "";
         let htmlRows = "";
 
-        sortedVars.forEach(v => {
-            const categoryName   = (v[3] || 'UNGROUPED').toUpperCase();
-            const varietyName    = v[0] || '-';
-            const itemIntro      = v[1] || '';
-            
-            // 🔍 【錯位修正核心】：動態偵測後端目前吐出的實際順序。
-            // 由於前四個固有欄位固定佔用 [0]~[3]，我們動態掃描其餘位置以完美配對：
-            let scientificName = '-';
-            let color          = '-';
-            let stem           = '-';
-            let length         = '-';
-            let fobPrice       = '-';
+        vars.forEach(v => {
+            const varietyName    = v[0] || '-'; // A欄
+            const scientificName = v[1] || '-'; // B欄
+            const color          = v[2] || '-'; // C欄
+            const stemLength     = v[3] || '-'; // D欄
+            const fobPrice       = v[4] || '-'; // E欄
+            const memo           = v[5] || '';  // F欄
 
-            // 直接精確比對並自動歸位，解決後端陣列排序錯位問題
-            for(let k = 4; k < v.length; k++) {
-                if(!v[k]) continue;
-                let valStr = v[k].toString().trim();
-                if(valStr === "" || valStr === "-") continue;
-
-                // 1. 判斷是否為價格：包含小數點或純數字，且前一手沒有填給過學名時
-                if (!isNaN(valStr) && valStr.indexOf('.') !== -1 && fobPrice === '-') {
-                    fobPrice = valStr;
-                }
-                // 2. 判斷是否為 Stem：純整數數字（如 50, 60, 80）
-                else if (!isNaN(valStr) && Number.isInteger(Number(valStr)) && parseInt(valStr) > 15 && stem === '-') {
-                    stem = valStr;
-                }
-                // 3. 判斷是否為長度規格：含有 cm / cm 字樣（如 60-70cm）或者是短整數（如 60, 70）
-                else if ((valStr.toLowerCase().includes('cm') || (!isNaN(valStr) && parseInt(valStr) <= 150)) && length === '-') {
-                    length = valStr.toLowerCase().includes('cm') ? valStr : valStr + ' cm';
-                }
-                // 4. 判斷是否為學名（通常是拉丁植物英文字母，且長度較長）
-                else if (/[a-zA-Z]/.test(valStr) && valStr.length > 5 && scientificName === '-') {
-                    scientificName = valStr;
-                }
-                // 5. 判斷是否為顏色（通常是單個字串英文，如 Pink, Yellow, White）
-                else if (/[a-zA-Z]/.test(valStr) && valStr.length <= 10 && color === '-') {
-                    color = valStr;
-                }
-            }
-
-            // 【終極保險補正】：如果在比對完後發現 fobPrice 還是空，而 scientificName 被錯誤塞進了數字
-            if (fobPrice === '-' && !isNaN(scientificName)) {
-                fobPrice = scientificName;
-                scientificName = '-';
-            }
-
-            // 動態分類群組橫條
-            if (categoryName !== currentCategory) {
-                currentCategory = categoryName;
-                htmlRows += `
-                    <tr class="category-row-header">
-                        <td colspan="6" class="text-uppercase fw-bold py-2 px-3 text-success" style="background-color: #f1f8e9;">
-                            ➔ ${currentCategory}
-                        </td>
-                    </tr>
-                `;
-            }
-
-            // 格式化美金價格顯示
+            // 格式化美金價格
             let displayPrice = fobPrice;
             if(fobPrice !== '-' && !isNaN(fobPrice) && fobPrice !== '') {
                 displayPrice = '$' + parseFloat(fobPrice).toFixed(2);
@@ -318,15 +261,12 @@
 
             htmlRows += `
                 <tr>
-                    <td>
-                        <div class="catalog-item-title">${varietyName}</div>
-                        ${itemIntro ? `<div class="box-intro text-secondary small">${itemIntro}</div>` : ''}
-                    </td>
+                    <td class="catalog-item-title">${varietyName}</td>
                     <td class="scientific-name-style">${scientificName}</td>
                     <td class="text-center text-muted">${color}</td>
-                    <td class="text-center fw-semibold">${stem}</td>
-                    <td class="text-center">${length}</td>
-                    <td class="text-end fw-bold text-success pe-4">${displayPrice}</td>
+                    <td class="text-center fw-semibold">${stemLength}</td>
+                    <td class="text-end fw-bold text-success">${displayPrice}</td>
+                    <td class="ps-4 memo-text-style">${memo}</td>
                 </tr>
             `;
         });
@@ -334,11 +274,34 @@
         tbody.innerHTML = htmlRows;
     }
 
+    /* 2. 下單頁面：無圖精簡版文字卡片，優化填單效率 */
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
-            const unit = getOrderUnit(v[3]);
-            return `<div class="col"><div class="item-box shadow-sm"><div class="img-container"><img src="${v[2] || 'https://via.placeholder.com/1000x1414'}" class="img-item"></div><div class="box-body"><div class="box-variety">${v[3] || ''}</div><div class="box-item-name">${v[0]}</div><div class="box-intro">${v[1] || ''}</div></div><div class="order-control"><div class="input-group input-group-sm"><span class="input-group-text bg-white fw-bold">Qty</span><input type="number" class="form-control order-qty" data-name="${v[0]}" data-unit="${unit}" min="0" value="0" oninput="updateLiveSummary()"><span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span></div></div></div></div>`;
+            const varietyName    = v[0];
+            const scientificName = v[1] ? `(${v[1]})` : '';
+            const stemLength     = v[3] ? v[3] : '';
+            const memo           = v[5] ? v[5] : '';
+            const unit           = getOrderUnit(varietyName);
+            
+            return `
+                <div class="col">
+                    <div class="item-text-box shadow-sm">
+                        <div>
+                            <div class="order-variety-title">${varietyName}</div>
+                            <div class="order-scientific">${scientificName}</div>
+                            ${stemLength ? `<div class="order-spec-meta">Spec: ${stemLength}</div>` : ''}
+                            ${memo ? `<div class="box-intro text-muted">${memo}</div>` : ''}
+                        </div>
+                        <div class="order-control">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white fw-bold">Qty</span>
+                                <input type="number" class="form-control order-qty" data-name="${varietyName}" data-unit="${unit}" min="0" value="0" oninput="updateLiveSummary()">
+                                <span class="unit-label ${unit === 'BU' ? 'unit-bu' : ''}">${unit}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
         }).join('');
     }
 
