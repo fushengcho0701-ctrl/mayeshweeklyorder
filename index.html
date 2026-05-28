@@ -18,10 +18,6 @@
         .card-title { color: var(--fwu-main); font-weight: 700; border-left: 5px solid var(--fwu-main); padding-left: 12px; margin-bottom: 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
 
-        /* Compact Tool Box */
-        .tool-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--fwu-main); }
-        .result-inline { background: var(--fwu-main); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 800; font-size: 1.2rem; }
-
         /* Grid Setup (用於 PLACE ORDER 頁面卡片維持 RWD) */
         .row-cols-custom-4 > .col { flex: 0 0 auto; width: 25%; }
         @media (max-width: 1400px) { .row-cols-custom-4 > .col { width: 33.33%; } }
@@ -35,8 +31,6 @@
         .box-body { padding: 15px; flex-grow: 1; }
         .box-variety { color: var(--fwu-main); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
         .box-item-name { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-top: 5px; margin-bottom: 2px; }
-        
-        /* 品種介紹說明的文字樣式 */
         .box-intro { font-size: 0.85rem; color: #666; font-style: italic; margin-top: 3px; line-height: 1.3; }
         
         .order-control { padding: 10px 15px; border-top: 1px solid #eee; background: #fafafa; }
@@ -45,7 +39,7 @@
 
         .btn-submit { background-color: var(--fwu-main); border: none; padding: 18px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
 
-        /* Price List & History Table UI/UX 優化樣式 */
+        /* Price List & History Table 樣式 */
         .table-price-list, .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
         .table-price-list thead, .table-history thead { background-color: var(--fwu-main); color: white; }
         .table-price-list th, .table-history th { font-weight: 700; border: none; padding: 14px; vertical-align: middle; }
@@ -59,7 +53,7 @@
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
         .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
 
-        /* 右側固定即時摘要的樣式 */
+        /* 右側固定即時摘要 */
         .sticky-summary-box {
             position: -webkit-sticky;
             position: sticky;
@@ -95,26 +89,6 @@
     <div class="tab-content">
         
         <div class="tab-pane fade show active" id="catalogTab">
-            <div class="card mb-4 mx-auto" style="max-width: 1200px;">
-                <div class="card-body tool-box">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">1. Filter Category</label>
-                            <select id="toolVariety" class="form-select" onchange="onCategorySelectChange()">
-                                <option value="">-- All Categories --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">2. Packing Specification Check</label>
-                            <select id="toolSpec" class="form-select" disabled onchange="calculateRate()">
-                                <option value="">-- Select Spec --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4"><div id="rateResult" class="result-inline d-none"><span id="finalRate">-</span></div></div>
-                    </div>
-                </div>
-            </div>
-
             <div class="card mx-auto shadow-sm" style="max-width: 1200px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -132,7 +106,7 @@
                             <tbody id="priceListBody">
                                 <tr>
                                     <td colspan="6" class="text-center py-5 text-muted">
-                                        <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Price List...
+                                        <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Price List from Google Sheet...
                                     </td>
                                 </tr>
                             </tbody>
@@ -145,7 +119,6 @@
         <div class="tab-pane fade" id="orderTab">
             <form id="orderForm">
                 <div class="row g-4">
-                    
                     <div class="col-lg-9">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
@@ -198,7 +171,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </form>
         </div>
@@ -236,66 +208,41 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxMVL5vqHNUHXg5Ixxy3luzugYvh0MpsVgZCrfdmLSZmhHJuGar7P6mSZ9cFgJeBdNJg/exec';
-    let packRateData = [];
     let allOrders = [];
     let initialVarietiesData = [];
 
     function getOrderUnit(category) { return (category && category.toString().includes("Oncidium")) ? "BU" : "Box"; }
-    function getPackUnit(category) { const cat = category ? category.toString() : ""; return (cat.includes("Vanda") || cat.includes("Anthurium")) ? "Stem" : "BU"; }
 
     window.onload = function() {
-        // 請確保您的 Google Apps Script 在後端回傳這 6 個欄位的陣列資料
-        // 預期後端 JSON format 範例： v[0]=Variety Name, v[1]=Intro, v[2]=img_url, v[3]=Category, v[4]=Scientific Name, v[5]=Color, v[6]=Stem, v[7]=Length, v[8]=FOB_USD
-        fetch(`${GAS_URL}?action=init`).then(res => res.json()).then(data => {
-            packRateData = data.packRate;
+        // 嘗試抓取資料，若因安全連線阻擋則跳出警告提示
+        fetch(`${GAS_URL}?action=init`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network response error');
+            return res.json();
+        })
+        .then(data => {
             initialVarietiesData = data.varieties;
-            initTool(data.packRate);
             renderPriceListTable(data.varieties);
             renderOrderGrid(data.varieties);
+        })
+        .catch(err => {
+            console.error("Data Fetch Error: ", err);
+            document.getElementById('priceListBody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-danger fw-bold">
+                        ⚠️ 找不到資料！請檢查網址列左側是否顯示「不安全 (http)」。<br>
+                        請改使用安全連線 <a href="https://mayeshorder.fwusheng.com" class="text-decoration-underline text-danger">https://mayeshorder.fwusheng.com</a> 開啟網頁。
+                    </td>
+                </tr>
+            `;
         });
     };
 
-    function initTool(rates) {
-        const select = document.getElementById('toolVariety');
-        const types = [...new Set(rates.slice(1).map(r => r[0]))];
-        select.innerHTML = '<option value="">-- All Categories --</option>';
-        types.forEach(t => { if(t) select.innerHTML += `<option value="${t}">${t}</option>`; });
-    }
-
-    function onCategorySelectChange() {
-        updateSpecOptions();
-        const selectedCategory = document.getElementById('toolVariety').value;
-        if (!selectedCategory) {
-            renderPriceListTable(initialVarietiesData);
-        } else {
-            const filtered = initialVarietiesData.filter(v => (v[3] || '').trim().toUpperCase() === selectedCategory.trim().toUpperCase());
-            renderPriceListTable(filtered);
-        }
-    }
-
-    function updateSpecOptions() {
-        const type = document.getElementById('toolVariety').value;
-        const specSelect = document.getElementById('toolSpec');
-        specSelect.innerHTML = '<option value="">-- Select Spec --</option>';
-        document.getElementById('rateResult').classList.add('d-none');
-        if(!type) { specSelect.disabled = true; return; }
-        specSelect.disabled = false;
-        packRateData.filter(r => r[0] === type).forEach(s => { specSelect.innerHTML += `<option value="${s[2]}">${s[1]}</option>`; });
-    }
-
-    function calculateRate() {
-        const rate = document.getElementById('toolSpec').value;
-        const type = document.getElementById('toolVariety').value;
-        if(!rate) return;
-        document.getElementById('finalRate').innerText = `${rate} ${getPackUnit(type)}`;
-        document.getElementById('rateResult').classList.remove('d-none');
-    }
-
-    /* 渲染全新多欄位 Price List 表格（對應新增的 Tab 欄位規格） */
+    /* 渲染 6 欄位 Price List 表格 */
     function renderPriceListTable(vars) {
         const tbody = document.getElementById('priceListBody');
         if(!vars || vars.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No items matched the criteria.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No items found in Price List.</td></tr>';
             return;
         }
 
@@ -309,7 +256,6 @@
             const categoryName   = (v[3] || 'UNGROUPED').toUpperCase();
             const varietyName    = v[0] || '-';
             const itemIntro      = v[1] || '';
-            // 請依照您 Google Sheet 實際回傳的 index 順序調整對應（以下為普遍推薦排序預設）
             const scientificName = v[4] || '-';
             const color          = v[5] || '-';
             const stem           = v[6] || '-';
@@ -334,7 +280,6 @@
                 displayPrice = '$' + parseFloat(fobPrice).toFixed(2);
             }
 
-            // 產生 6 欄位的資料列
             htmlRows += `
                 <tr>
                     <td>
@@ -353,7 +298,6 @@
         tbody.innerHTML = htmlRows;
     }
 
-    // 在 Place Order 下單區域
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         grid.innerHTML = vars.map(v => {
@@ -400,7 +344,6 @@
         summaryTotal.classList.remove('d-none');
     }
 
-    // --- History Logic ---
     function loadHistory() {
         const historyDiv = document.getElementById('historyContent');
         historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching records...</p></div>';
@@ -448,7 +391,7 @@
         });
 
         let html = `<table class="table table-bordered table-history align-middle">
-                        <thead><tr><th>Location</th><th>Submit Time (Full)</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
+                        <thead><tr><th>Location</th><th>Submit Time</th><th>Variety Name</th><th class="text-end">Qty / Unit</th></tr></thead>
                         <tbody>`;
         
         for(let loc in locGroups) {
@@ -465,7 +408,6 @@
         historyDiv.innerHTML = html;
     }
 
-    // --- Submission & CSV ---
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         const items = [];
