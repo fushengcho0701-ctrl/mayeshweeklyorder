@@ -38,7 +38,8 @@
         .unit-label { background: #f8f9fa; border: 1px solid #ced4da; border-left: none; padding: 0.375rem 0.5rem; border-radius: 0 0.375rem 0.375rem 0; font-weight: 800; min-width: 80px; text-align: center; font-size: 0.82rem; }
         .unit-highlight { color: white; background: var(--fwu-main); border-color: var(--fwu-main); }
 
-        .btn-submit { background-color: var(--fwu-main); border: none; padding: 15px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; }
+        .btn-submit { background-color: var(--fwu-main); border: none; padding: 15px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; transition: 0.2s; }
+        .btn-submit:disabled { background-color: #a0a0a0 !important; cursor: not-allowed; }
 
         /* Price List & History Table 樣式 */
         .table-price-list, .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
@@ -217,31 +218,39 @@
         var catStr = (category || "").toString().toLowerCase().trim();
         var nameStr = (name || "").toString().toLowerCase().trim();
         
-        // 1. Oncidium 分類或品名包含文心蘭 ➔ 鎖定 Bunches
         if (catStr.includes("oncidium") || nameStr.includes("oncidium")) {
             return "Bunches";
         }
-        // 2. Vanda 分類或品名包含萬代蘭 ➔ 鎖定 stems
         if (catStr.includes("vanda") || nameStr.includes("vanda")) {
             return "stems";
         }
-        // 3. Anthurium 及 水晶花燭(Anthurium Clarinervium) ➔ 鎖定 box
         if (catStr.includes("anthurium") || nameStr.includes("anthurium")) {
             return "box";
         }
-        // 常規預設為 Box
         return "box"; 
     }
 
     window.onload = function() {
+        // 【核心修正問題二】防範客人按 Enter 導致表單未完工就被提前默默送出
+        const orderForm = document.getElementById('orderForm');
+        orderForm.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                // 如果觸發 Enter 的不是送出按鈕本身，就強制封鎖預設送出行為
+                if (event.target.id !== 'submitBtn') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        });
+
         fetch(`${GAS_URL}?action=init`)
         .then(res => {
             if (!res.ok) throw new Error('Network response error');
             return res.json();
         })
         .then(data => {
-            renderPriceListTable(data.priceList); // 渲染文字報價單
-            renderOrderGrid(data.varieties);    // 渲染有圖下單卡片格網
+            renderPriceListTable(data.priceList); 
+            renderOrderGrid(data.varieties);    
         })
         .catch(err => {
             console.error("Data Fetch Error: ", err);
@@ -284,7 +293,7 @@
         tbody.innerHTML = htmlRows;
     }
 
-    /* 渲染下單相簿卡片網格 (完全讀取自 Variety List 頁籤) */
+    /* 渲染下單相簿卡片網格 */
     function renderOrderGrid(vars) {
         const grid = document.getElementById('orderGrid');
         if(!vars || vars.length === 0) {
@@ -298,9 +307,7 @@
             const imgUrl      = v[2] || 'https://via.placeholder.com/1000x1414';
             const category    = v[3] || '';
             
-            // 自動適配專屬下單單位
             const unit = getOrderUnit(category, varietyName);
-            // 針對 Bunches 與 stems 進行視覺高亮強化，方便買家辨識
             const isHighlightUnit = (unit === 'Bunches' || unit === 'stems');
             
             return `
@@ -365,7 +372,7 @@
         summaryTotal.classList.remove('d-none');
     }
 
-    /* 歷史歷史訂單 */
+    /* 讀取歷史訂單 */
     function loadHistory() {
         const historyDiv = document.getElementById('historyContent');
         historyDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success"></div><p>Fetching records...</p></div>';
@@ -430,20 +437,47 @@
         historyDiv.innerHTML = html;
     }
 
+    // 【核心修正問題一】下單按鈕觸發事件優化：加入防重複點擊鎖定與動態轉圈圈動畫
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
         const items = [];
+        
         document.querySelectorAll('.order-qty').forEach(input => {
             if(parseInt(input.value) > 0) items.push({ name: input.dataset.name, qty: input.value, unit: input.dataset.unit });
         });
         if(items.length === 0) return alert("Select items.");
+        
+        // 1. 立即鎖定按鈕，並注入 Bootstrap 轉圈圈動畫與提示文字
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Sending Order...
+        `;
+
         const payload = { location: document.getElementById('inputLocation').value, shippingDate: document.getElementById('inputDate').value, items: items };
-        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(res => {
+        
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => {
+            if(!res.ok) throw new Error("Server Error");
+            return res.json();
+        })
+        .then(res => {
             window.lastOrderInfo = payload;
             let html = `<h6>Market: ${payload.location}</h6><table class="table table-sm">`;
             items.forEach(i => html += `<tr><td>${i.name}</td><td class="text-end"><strong>${i.qty} ${i.unit}</strong></td></tr>`);
             document.getElementById('summaryList').innerHTML = html + "</table>";
             new bootstrap.Modal(document.getElementById('summaryModal')).show();
+        })
+        .catch(err => {
+            alert("Submission failed. Please check connection and try again.");
+            console.error(err);
+        })
+        .finally(() => {
+            // 2. 請求完畢不論成功失敗，皆解除按鈕鎖定並回復文字（成功後通常會因為 Modal 重整，此處防呆失敗時可再點擊）
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "SUBMIT ORDER";
         });
     };
 
