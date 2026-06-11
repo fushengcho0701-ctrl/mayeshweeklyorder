@@ -11,9 +11,33 @@
         
         /* Header & Nav */
         .header-section { background: white; padding: 30px 0 10px 0; border-bottom: 5px solid var(--fwu-main); text-align: center; margin-bottom: 20px; }
-        .header-title { color: var(--fwu-main); font-weight: 800; letter-spacing: 2px; margin-bottom: 20px; }
+        .header-title { color: var(--fwu-main); font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; }
         .nav-pills .nav-link { color: #666; font-weight: 600; border-radius: 30px; padding: 10px 25px; margin: 0 5px; border: 1px solid #ddd; font-size: 0.9rem; }
         .nav-pills .nav-link.active { background-color: var(--fwu-main); border-color: var(--fwu-main); color: white; }
+
+        /* 新增：倒數計時橫條優化樣式 */
+        .countdown-banner {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            font-weight: 700;
+            padding: 8px 15px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.25);
+            font-size: 0.95rem;
+        }
+        .countdown-timer {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 2px 10px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            font-weight: 800;
+        }
 
         .card-title { color: var(--fwu-main); font-weight: 700; border-left: 5px solid var(--fwu-main); padding-left: 12px; margin-bottom: 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
@@ -79,6 +103,13 @@
 
 <div class="header-section shadow-sm">
     <h1 class="header-title text-uppercase">[FWU] Mayesh Weekly Order</h1>
+    
+    <div class="countdown-banner">
+        <span>⏰ <strong>Order Deadline:</strong> Friday 08:00 AM (Taiwan Time)</span>
+        <span>|</span>
+        <span><strong>Time Left:</strong> <span id="orderCountdown" class="countdown-timer">00d 00h 00m 00s</span></span>
+    </div>
+
     <ul class="nav nav-pills justify-content-center mb-3" id="mainTab" role="tablist">
         <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#catalogTab">1. PRICE LIST</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#orderTab">2. PLACE ORDER</button></li>
@@ -231,12 +262,66 @@
         return "box"; 
     }
 
+    // 新增：智慧型週五收單倒數計時引擎 (鎖定台灣時間 GMT+8)
+    function initDeadlineCountdown() {
+        const timerElement = document.getElementById('orderCountdown');
+        
+        function updateTimer() {
+            const now = new Date();
+            
+            // 將本地時間換算為台灣時間 (GMT+8)
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const taiwanNow = new Date(utc + (3600000 * 8));
+            
+            // 計算目標週五 08:00 的台灣時間物件
+            let targetFriday = new Date(taiwanNow.getTime());
+            targetFriday.setHours(8, 0, 0, 0);
+            
+            // 計算這週五與今天差幾天 (0:日, 1:一, ..., 5:五, 6:六)
+            let daysUntilFriday = (5 - taiwanNow.getDay() + 7) % 7;
+            
+            // 如果今天就是週五，但已經超過早上 8 點，目標自動移向下一週的週五
+            if (taiwanNow.getDay() === 5 && taiwanNow.getHours() >= 8) {
+                daysUntilFriday = 7;
+            }
+            
+            targetFriday.setDate(taiwanNow.getDate() + daysUntilFriday);
+            
+            // 計算台灣目標時間與台灣現在時間的毫秒差值
+            const msDifference = targetFriday.getTime() - taiwanNow.getTime();
+            
+            if (msDifference <= 0) {
+                timerElement.innerText = "00d 00h 00m 00s";
+                return;
+            }
+            
+            // 計算天、時、分、秒
+            const days = Math.floor(msDifference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((msDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((msDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((msDifference % (1000 * 60)) / 1000);
+            
+            // 格式化補零
+            const dDisplay = String(days).padStart(2, '0') + "d";
+            const hDisplay = String(hours).padStart(2, '0') + "h";
+            const mDisplay = String(minutes).padStart(2, '0') + "m";
+            const sDisplay = String(seconds).padStart(2, '0') + "s";
+            
+            timerElement.innerText = `${dDisplay} ${hDisplay} ${mDisplay} ${sDisplay}`;
+        }
+        
+        updateTimer();
+        setInterval(updateTimer, 1000); // 每秒跳動更新一次
+    }
+
     window.onload = function() {
-        // 【核心修正問題二】防範客人按 Enter 導致表單未完工就被提前默默送出
+        // 啟動倒數計時器
+        initDeadlineCountdown();
+
+        // 防範客人按 Enter 導致表單未完工就被提前默默送出
         const orderForm = document.getElementById('orderForm');
         orderForm.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' || event.keyCode === 13) {
-                // 如果觸發 Enter 的不是送出按鈕本身，就強制封鎖預設送出行為
                 if (event.target.id !== 'submitBtn') {
                     event.preventDefault();
                     return false;
@@ -438,7 +523,6 @@
         historyDiv.innerHTML = html;
     }
 
-    // 【核心修正問題一】下單按鈕觸發事件優化：加入防重複點擊鎖定與動態轉圈圈動畫
     document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
         
@@ -450,7 +534,6 @@
         });
         if(items.length === 0) return alert("Select items.");
         
-        // 1. 立即鎖定按鈕，並注入 Bootstrap 轉圈圈動畫與提示文字
         submitBtn.disabled = true;
         submitBtn.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -476,7 +559,6 @@
             console.error(err);
         })
         .finally(() => {
-            // 2. 請求完畢不論成功失敗，皆解除按鈕鎖定並回復文字（成功後通常會因為 Modal 重整，此處防呆失敗時可再點擊）
             submitBtn.disabled = false;
             submitBtn.innerHTML = "SUBMIT ORDER";
         });
