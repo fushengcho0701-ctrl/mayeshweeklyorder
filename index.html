@@ -15,7 +15,7 @@
         .nav-pills .nav-link { color: #666; font-weight: 600; border-radius: 30px; padding: 10px 25px; margin: 0 5px; border: 1px solid #ddd; font-size: 0.9rem; }
         .nav-pills .nav-link.active { background-color: var(--fwu-main); border-color: var(--fwu-main); color: white; }
 
-        /* 新增：倒數計時橫條優化樣式 */
+        /* 倒數計時橫條樣式 */
         .countdown-banner {
             background: linear-gradient(135deg, #ff6b6b, #ff8e53);
             color: white;
@@ -65,15 +65,11 @@
         .btn-submit { background-color: var(--fwu-main); border: none; padding: 15px; font-weight: bold; border-radius: 12px; font-size: 1.25rem; color: white; transition: 0.2s; }
         .btn-submit:disabled { background-color: #a0a0a0 !important; cursor: not-allowed; }
 
-        /* Price List & History Table 樣式 */
-        .table-price-list, .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
-        .table-price-list thead, .table-history thead { background-color: var(--fwu-main); color: white; }
-        .table-price-list th, .table-history th { font-weight: 700; border: none; padding: 14px; vertical-align: middle; }
-        .table-price-list td, .table-history td { padding: 14px; border-color: #f1f1f1; vertical-align: middle; }
-        
-        .catalog-item-title { font-size: 1.05rem; font-weight: 700; color: #222; }
-        .scientific-name-style { font-style: italic; color: #4a5568; font-size: 0.95rem; }
-        .memo-text-style { font-size: 0.85rem; color: #718096; font-style: italic; }
+        /* History Table 樣式 */
+        .table-history { background: white; border-radius: 8px; overflow: hidden; border: none; }
+        .table-history thead { background-color: var(--fwu-main); color: white; }
+        .table-history th { font-weight: 700; border: none; padding: 14px; vertical-align: middle; }
+        .table-history td { padding: 14px; border-color: #f1f1f1; vertical-align: middle; }
 
         .badge-loc { background-color: #e9ecef; color: #495057; font-weight: 700; padding: 5px 10px; border-radius: 5px; }
         .ts-cell { font-size: 0.75rem; color: #666; white-space: nowrap; padding: 8px !important; }
@@ -111,44 +107,16 @@
     </div>
 
     <ul class="nav nav-pills justify-content-center mb-3" id="mainTab" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#catalogTab">1. PRICE LIST</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#orderTab">2. PLACE ORDER</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#historyTab" onclick="loadHistory()">3. ORDER HISTORY</button></li>
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#orderTab">PLACE ORDER</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#historyTab" onclick="loadHistory()">ORDER HISTORY</button></li>
     </ul>
 </div>
 
 <div class="container-fluid px-4 pb-5">
     <div class="tab-content">
         
-        <div class="tab-pane fade show active" id="catalogTab">
-            <div class="card mx-auto shadow-sm" style="max-width: 1250px;">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle table-price-list mb-0" id="priceListTable">
-                            <thead>
-                                <tr>
-                                    <th style="width: 25%;">Variety Name</th>
-                                    <th style="width: 20%;">Scientific Name</th>
-                                    <th style="width: 12%;" class="text-center">Color</th>
-                                    <th style="width: 13%;" class="text-center">Stem Length</th>
-                                    <th style="width: 12%;" class="text-end">FOB_USD</th>
-                                    <th style="width: 18%;" class="ps-4">Memo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="priceListBody">
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <div class="spinner-border text-success spinner-border-sm me-2"></div>Loading Latest Price List...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="orderTab">
+        <!-- PLACE ORDER (頁面改為預設顯示 active show) -->
+        <div class="tab-pane fade show active" id="orderTab">
             <form id="orderForm">
                 <div class="row g-4">
                     
@@ -214,6 +182,7 @@
             </form>
         </div>
 
+        <!-- ORDER HISTORY -->
         <div class="tab-pane fade" id="historyTab">
             <div class="card mx-auto" style="max-width: 1200px;">
                 <div class="card-body">
@@ -266,32 +235,27 @@
         return "box"; 
     }
 
-    // 新增：智慧型週五收單倒數計時引擎 (鎖定台灣時間 GMT+8)
+    // 智慧型週五收單倒數計時引擎 (鎖定台灣時間 GMT+8)
     function initDeadlineCountdown() {
         const timerElement = document.getElementById('orderCountdown');
         
         function updateTimer() {
             const now = new Date();
             
-            // 將本地時間換算為台灣時間 (GMT+8)
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
             const taiwanNow = new Date(utc + (3600000 * 8));
             
-            // 計算目標週五 08:00 的台灣時間物件
             let targetFriday = new Date(taiwanNow.getTime());
             targetFriday.setHours(8, 0, 0, 0);
             
-            // 計算這週五與今天差幾天 (0:日, 1:一, ..., 5:五, 6:六)
             let daysUntilFriday = (5 - taiwanNow.getDay() + 7) % 7;
             
-            // 如果今天就是週五，但已經超過早上 8 點，目標自動移向下一週的週五
             if (taiwanNow.getDay() === 5 && taiwanNow.getHours() >= 8) {
                 daysUntilFriday = 7;
             }
             
             targetFriday.setDate(taiwanNow.getDate() + daysUntilFriday);
             
-            // 計算台灣目標時間與台灣現在時間的毫秒差值
             const msDifference = targetFriday.getTime() - taiwanNow.getTime();
             
             if (msDifference <= 0) {
@@ -299,13 +263,11 @@
                 return;
             }
             
-            // 計算天、時、分、秒
             const days = Math.floor(msDifference / (1000 * 60 * 60 * 24));
             const hours = Math.floor((msDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((msDifference % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((msDifference % (1000 * 60)) / 1000);
             
-            // 格式化補零
             const dDisplay = String(days).padStart(2, '0') + "d";
             const hDisplay = String(hours).padStart(2, '0') + "h";
             const mDisplay = String(minutes).padStart(2, '0') + "m";
@@ -315,14 +277,12 @@
         }
         
         updateTimer();
-        setInterval(updateTimer, 1000); // 每秒跳動更新一次
+        setInterval(updateTimer, 1000);
     }
 
     window.onload = function() {
-        // 啟動倒數計時器
         initDeadlineCountdown();
 
-        // 防範客人按 Enter 導致表單未完工就被提前默默送出
         const orderForm = document.getElementById('orderForm');
         orderForm.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' || event.keyCode === 13) {
@@ -339,49 +299,12 @@
             return res.json();
         })
         .then(data => {
-            renderPriceListTable(data.priceList); 
             renderOrderGrid(data.varieties);    
         })
         .catch(err => {
             console.error("Data Fetch Error: ", err);
         });
     };
-
-    /* 渲染文字報價單 (Price List) */
-    function renderPriceListTable(priceData) {
-        const tbody = document.getElementById('priceListBody');
-        if(!priceData || priceData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Price List 內無有效數據。</td></tr>';
-            return;
-        }
-
-        let htmlRows = "";
-        priceData.forEach(v => {
-            const varietyName    = v[0] || '-';
-            const scientificName = v[1] || '-';
-            const color          = v[2] || '-';
-            const stemLength     = v[3] || '-';
-            const fobPrice       = v[4] || '-';
-            const memo           = v[5] || '';
-
-            let displayPrice = fobPrice;
-            if(fobPrice !== '-' && !isNaN(fobPrice) && fobPrice !== '') {
-                displayPrice = '$' + parseFloat(fobPrice).toFixed(2);
-            }
-
-            htmlRows += `
-                <tr>
-                    <td class="catalog-item-title">${varietyName}</td>
-                    <td class="scientific-name-style">${scientificName}</td>
-                    <td class="text-center text-muted">${color}</td>
-                    <td class="text-center fw-semibold">${stemLength}</td>
-                    <td class="text-end fw-bold text-success">${displayPrice}</td>
-                    <td class="ps-4 memo-text-style">${memo}</td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = htmlRows;
-    }
 
     /* 渲染下單相簿卡片網格 */
     function renderOrderGrid(vars) {
