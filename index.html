@@ -303,7 +303,7 @@
             
             // 判斷是否為週五 (5 代表 Friday)
             if (selectedDate.getDay() !== 5) {
-                alert("Shipping Date 可以選擇的日期僅限每週五 (Friday)，系統已自動幫您調整為最近的週五。");
+                alert("Shipping Date is restricted to Fridays only.");
                 
                 // 自動修正為離選取日期最近的週五
                 let correctFriday = new Date(selectedDate);
