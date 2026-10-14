@@ -279,9 +279,18 @@
         setInterval(updateTimer, 1000);
     }
 
-    /* 📅 限制 Shipping Date 僅能選擇每週五 */
+    /* 📅 限制 Shipping Date 僅能選擇每週五 (修正時區偏差) */
     function setupFridayOnlyDatePicker() {
         const dateInput = document.getElementById('inputDate');
+        
+        // 格式化日期為 YYYY-MM-DD (完全使用本地時間，避免 toISOString 時區少一天的 bug)
+        function formatDateToYYYYMMDD(dateObj) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         const today = new Date();
         
         // 計算最近的下一個週五（如果今天就是週五則帶入今天）
@@ -290,16 +299,16 @@
         let daysUntilFriday = (5 - dayOfWeek + 7) % 7;
         nextFriday.setDate(today.getDate() + daysUntilFriday);
 
-        // 格式化為 YYYY-MM-DD 帶入預設值
-        const defaultFridayStr = nextFriday.toISOString().split('T')[0];
-        dateInput.value = defaultFridayStr;
+        // 帶入預設週五日期
+        dateInput.value = formatDateToYYYYMMDD(nextFriday);
 
         // 當使用者嘗試手動更換日期時進行防呆檢驗
         dateInput.addEventListener('change', function() {
             if (!this.value) return;
             
-            // 使用 T00:00:00 避免時區偏差造成日期少算一天
-            const selectedDate = new Date(this.value + 'T00:00:00');
+            // 解析使用者選取的日期
+            const parts = this.value.split('-');
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
             
             // 判斷是否為週五 (5 代表 Friday)
             if (selectedDate.getDay() !== 5) {
@@ -310,7 +319,7 @@
                 let diff = (5 - selectedDate.getDay() + 7) % 7;
                 correctFriday.setDate(selectedDate.getDate() + diff);
                 
-                this.value = correctFriday.toISOString().split('T')[0];
+                this.value = formatDateToYYYYMMDD(correctFriday);
             }
         });
     }
